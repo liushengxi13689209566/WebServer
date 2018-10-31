@@ -67,15 +67,87 @@ class http_conn
 	};
 
   public:
-	http_conn() {}
+	http_conn() : http_check_state(CHECK_STATE_REQUESTLINE),
+				  http_keep_connect(false),
+				  http_method(GET),
+				  http_url(nullptr),
+				  http_version(nullptr),
+				  http_content_length(0),
+
+				  http_host(nullptr),
+				  http_start_line(0),
+				  http_checked_index(0),
+				  http_end_index(0),
+				  http_write_index(0),
+				  http_read_buf("\0"),
+				  http_write_buf("\0"),
+				  http_real_file("\0")
+
+	{
+	}
 	~http_conn() {}
 
   public:
-  	/**/
-	void init(int sockfd, const sockaddr_in &addr);
-};
-void http_conn::init(int sockfd, const sockaddr_in &addr)
-{
+	bool read();
 
+  public:
+	/*该连接的sockfd和对方的地址*/
+	int http_sockfd = 0;
+	sockaddr_in http_address;
+
+  private:
+	/*读缓冲区*/
+	char http_read_buf[BUFFERSIZE] = {0};
+	/*读缓冲区中已经读入的最后一个字节的位置*/
+	int http_end_index = 0;
+	/*正在分析的字符在读缓冲区中的位置*/
+	int http_checked_index = 0;
+	/*正在解析的行的起始位置*/
+	int http_start_line = 0;
+	/*写缓冲区*/
+	char http_write_buf[BUFFERSIZE] = {0};
+	/*写缓冲区中待发送的字节数*/
+	int http_write_index = 0;
+
+	/*主状态机所处的状态*/
+	CHECK_STATE http_check_state;
+	/*请求的方法*/
+	METHOD http_method;
+
+	/*客户请求的目标文件的完整的路径，＝　root+url */
+	char http_real_file[FILENAME_LEN] = {0};
+	/*url*/
+	char *http_url = nullptr;
+	/*版本*/
+	char *http_version = nullptr;
+	/*主机名*/
+	char *http_host = nullptr;
+	/*http请求的消息体的长度*/
+	int http_content_length = 0;
+	/*是否需要保持连接*/
+	bool http_keep_connect = false;
+};
+/*循环读取客户数据，直到无数据可读或者对方关闭连接*/
+bool http_conn::read()
+{
+	if (http_end_index >= BUFFERSIZE)
+		return false;
+	int readed_bytes = 0;
+	while (true)
+	{
+		readed_bytes = recv(http_sockfd, http_read_buf + http_end_index, BUFFERSIZE - http_end_index, 0);
+		if (readed_bytes == -1)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				return true; /*无数据可读，返回　true */
+			else
+				return false;
+		}
+		else if (readed_bytes == 0)
+			return false;
+		http_end_index += readed_bytes;
+	}
+	return true;
 }
+
 #endif

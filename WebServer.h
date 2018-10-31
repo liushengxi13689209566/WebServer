@@ -38,21 +38,26 @@ class WebServer
 	{
 		start(ip, port);
 	}
-	virtual ~WebServer()
+	~WebServer()
 	{
+		Close(epollfd);
+		Close(listenfd);
 	}
 
   private:
 	void Setnonblock(int fd);
 	void addfd(int fd, bool one_shot);
+	void removefd(int fd);
 	void addsig(int sig, void(handler)(int), bool restart = true);
 	int start(const char *ip, const int port);
+	void WebServer_init(int connfd, const sockaddr_in &client_address);
+	void WebServer_closefd(int connfd);
 
   private:
 	static int sum_user_count = 0; /*总用户*/
 	static int epollfd = -1;
 	static int listenfd = 0;
-	std::map<int, http_conn> users; /*预先分配一些任务类对象*/
+	std::map<int, http_conn> users; /*任务类对象*/
 };
 void WebServer::Setnonblock(int fd)
 {
@@ -70,6 +75,12 @@ void WebServer::addfd(int fd, bool one_shot)
 	Epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
 	Setnonblock(fd);
 }
+void WebServer::removefd(int fd)
+{
+	Epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, 0);
+	Close(fd);
+}
+
 void WebServer::addsig(int sig, void(handler)(int), bool restart)
 {
 	struct sigaction sa;
@@ -85,6 +96,28 @@ void WebServer::addsig(int sig, void(handler)(int), bool restart)
 	if (sigaction(sig, &sa, NULL) == -1)
 		throw __LINE__;
 }
+void WebServer::WebServer_init(int connfd, const sockaddr_in &client_address)
+{
+	int error = 0;
+	socklen_t len = sizeof(error);
+	/*处理错误*/
+	if (getsockopt(connfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
+		throw __LINE__;
+	addfd(connfd, true);
+	sum_user_count++;
+	users[connfd].http_sockfd = connfd;
+	users[connfd].http_address = client_address;
+}
+void WebServer::WebServer_closefd(int connfd)
+{
+	if (users[connfd].http_sockfd != -1)
+	{
+		removefd(connfd);
+		users[connfd].http_sockfd = -1;
+		sum_user_count--;
+	}
+}
+
 int WebServer::start(const char *ip, const int port)
 {
 	/*忽略SIGPIPE信号(SIG_IGN表示忽略SIGPIPE那个注册的信号)*/
@@ -103,7 +136,7 @@ int WebServer::start(const char *ip, const int port)
 	struct linger tmp = {1, 0};
 	Setsockopt(listenfd, SOL_SOCKET, SO_LINGER, &tmp, sizeof(tmp));
 
-	/*设置该套接字使之可以重新绑定端口,避免　time_wait　状态，用于调试*/
+	/*设置该套接字使之可以重新绑定端口 */
 	int optval = 1;
 	Setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (int *)&optval, sizeof(int));
 
@@ -118,6 +151,7 @@ int WebServer::start(const char *ip, const int port)
 		for (int i = 0; i < number; i++)
 		{
 			int sockfd = events[i].data.fd;
+
 			if (sockfd == listenfd) /*有新的连接到来*/
 			{
 				struct sockaddr_in client_address;
@@ -129,27 +163,27 @@ int WebServer::start(const char *ip, const int port)
 					continue;
 				}
 				/*如果不存在会直接插入 map<connfd,http_conn> 进去*/
-				users[connfd].init(connfd, client_address);
+				WebServer_init(connfd, client_address);
 			}
 			/*出错*/
 			else if (events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
 			{
 				/*如果有异常，直接关闭客户连接*/
-				users[sockfd].close_conn();
+				WebServer_closefd(sockfd);
 			}
 			/*读事件*/
 			else if (events[i].events & EPOLLIN)
 			{
 				if (users[sockfd].read())
-					pool.append(users[sockfd]); /*　users+sockfd 指针偏移*/
+					pool.append(&users[sockfd]);
 				else
-					users[sockfd].close_conn();
+					WebServer_closefd(sockfd);
 			}
 			/*写事件*/
 			else if (events[i].events & EPOLLOUT)
 			{
 				if ( !users[sockfd].write() )
-					users[sockfd].close_conn();
+					WebServer_closefd(sockfd);
 			}
 			/*其他*/
 			else
@@ -157,8 +191,6 @@ int WebServer::start(const char *ip, const int port)
 			}
 		}
 	}
-	close(epollfd);
-	close(listenfd);
 	return 0;
 }
 #endif
