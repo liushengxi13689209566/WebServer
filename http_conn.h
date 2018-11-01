@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <cassert>
 #include <sys/epoll.h>
+#include <sys/uio.h>
+
+#include "system_call.h"
 
 /*任务类*/
 class http_conn
@@ -78,7 +81,7 @@ class http_conn
 				  http_start_line(0),
 				  http_checked_index(0),
 				  http_end_index(0),
-				  http_write_index(0),
+				  http_write_count(0),
 				  http_read_buf("\0"),
 				  http_write_buf("\0"),
 				  http_real_file("\0")
@@ -86,14 +89,18 @@ class http_conn
 	{
 	}
 	~http_conn() {}
+	void init();
+	void modfd(int ev);
 
   public:
 	bool read();
+	bool write();
 
   public:
 	/*该连接的sockfd和对方的地址*/
 	int http_sockfd = 0;
 	sockaddr_in http_address;
+	static int http_epollfd;
 
   private:
 	/*读缓冲区*/
@@ -107,7 +114,7 @@ class http_conn
 	/*写缓冲区*/
 	char http_write_buf[BUFFERSIZE] = {0};
 	/*写缓冲区中待发送的字节数*/
-	int http_write_index = 0;
+	int http_write_count = 0;
 
 	/*主状态机所处的状态*/
 	CHECK_STATE http_check_state;
@@ -126,7 +133,40 @@ class http_conn
 	int http_content_length = 0;
 	/*是否需要保持连接*/
 	bool http_keep_connect = false;
+
+	/*客户请求的目标文件被mmap到内存中的起始位置*/
+	char *http_file_address = nullptr;
+	/*目标文件的状态，通过他判断是否需要发送　404　，以及文件大小等等*/
+	struct stat http_file_stat;
+	/*writev 集中写，尽量去避免复制操作，出发一次写操作*/
+	struct iovec http_iv[2];
+	/*被写的内存块的数量*/
+	int http_iv_count = 0;
 };
+void http_conn::init()
+{
+	http_check_state = CHECK_STATE_REQUESTLINE;
+	http_keep_connect = false;
+	http_method = GET;
+	http_url = nullptr;
+	http_version = nullptr;
+	http_content_length = 0;
+	http_host = nullptr;
+	http_start_line = 0;
+	http_checked_index = 0;
+	http_end_index = 0;
+	http_write_count = 0;
+	memset(http_read_buf, '\0', BUFFERSIZE);
+	memset(http_write_buf, '\0', BUFFERSIZE);
+	memset(http_real_file, '\0', FILENAME_LEN);
+}
+void http_conn::modfd(int ev)
+{
+	epoll_event event;
+	event.data.fd = http_sockfd;
+	event.events = ev | EPOLLET | EPOLLONESHOT | EPOLLRDHUP;
+	Epoll_ctl(http_epollfd, EPOLL_CTL_MOD, http_sockfd, &event);
+}
 /*循环读取客户数据，直到无数据可读或者对方关闭连接*/
 bool http_conn::read()
 {
@@ -149,5 +189,35 @@ bool http_conn::read()
 	}
 	return true;
 }
-
+bool http_conn::write()
+{
+	int temp = 0;
+	int bytes_have_send = 0;
+	int bytes_to_send = http_write_count;
+	if (bytes_to_send == 0)
+	{
+		modfd(EPOLLIN); /*改为读事件*/
+		init();
+		return true;
+	}
+	while (true)
+	{
+		temp = writev(http_sockfd, http_iv, http_iv_count);
+		if (temp <= -1)
+		{
+			/*如果写缓冲区没有空间，就等待下一轮的EPOLLOUT事件，在此期间服务器就会
+			无法立即接受到同一客户的下一个请求（这是一个问题）*/
+			if (errno == EAGAIN)
+			{
+				modfd(EPOLLOUT);
+				return true;
+			}
+			else
+			{
+				unmap();
+				return false;
+			}
+		}
+	}
+}
 #endif

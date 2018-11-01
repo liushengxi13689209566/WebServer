@@ -55,7 +55,6 @@ class WebServer
 
   private:
 	static int sum_user_count = 0; /*总用户*/
-	static int epollfd = -1;
 	static int listenfd = 0;
 	std::map<int, http_conn> users; /*任务类对象*/
 };
@@ -143,8 +142,10 @@ int WebServer::start(const char *ip, const int port)
 	Bind(listenfd, (struct sockaddr *)&address, sizeof(address));
 	Listen(listenfd, 5);
 	epoll_event events[MAX_EVENT_NUMBER];
-	epollfd = Epoll_create(5);
+	int epollfd = Epoll_create(5);
 	addfd(listenfd, false);
+	http_conn::http_epollfd = epollfd;
+
 	while (true)
 	{
 		int number = Epoll_wait(epollfd, events, MAX_EVENT_NUMBER, -1);
@@ -182,7 +183,7 @@ int WebServer::start(const char *ip, const int port)
 			/*写事件*/
 			else if (events[i].events & EPOLLOUT)
 			{
-				if ( !users[sockfd].write() )
+				if (!users[sockfd].write())
 					WebServer_closefd(sockfd);
 			}
 			/*其他*/
