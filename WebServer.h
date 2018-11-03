@@ -54,9 +54,10 @@ class WebServer
 	void WebServer_closefd(int connfd);
 
   private:
-	static int sum_user_count = 0; /*总用户*/
 	static int listenfd = 0;
 	std::map<int, http_conn> users; /*任务类对象*/
+  public:
+	static int sum_user_count = 0; /*总用户*/
 };
 void WebServer::Setnonblock(int fd)
 {
@@ -194,4 +195,5 @@ int WebServer::start(const char *ip, const int port)
 	}
 	return 0;
 }
+
 #endif

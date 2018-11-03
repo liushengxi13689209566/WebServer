@@ -22,6 +22,7 @@
 #include <sys/uio.h>
 
 #include "system_call.h"
+#include "WebServer.h"
 
 /*任务类*/
 class http_conn
@@ -89,12 +90,22 @@ class http_conn
 	{
 	}
 	~http_conn() {}
-	void init();
-	void modfd(int ev);
 
   public:
 	bool read();
 	bool write();
+	/*处理客户请求*/
+	void process();
+
+  private:
+	void init();
+	void modfd(int ev);
+	void http_close_conn();
+	HTTP_CODE process_read();
+
+  private:
+	/*process_read 所使用的函数*/
+	LINE_STATUS parse_line();
 
   public:
 	/*该连接的sockfd和对方的地址*/
@@ -143,6 +154,7 @@ class http_conn
 	/*被写的内存块的数量*/
 	int http_iv_count = 0;
 };
+
 void http_conn::init()
 {
 	http_check_state = CHECK_STATE_REQUESTLINE;
@@ -214,10 +226,125 @@ bool http_conn::write()
 			}
 			else
 			{
-				unmap();
+				return false;
+			}
+		}
+		bytes_to_send -= temp;
+		bytes_have_send += temp;
+		if (bytes_to_send <= bytes_have_send)
+		{
+			if (http_keep_connect)
+			{
+				init();
+				modfd(EPOLLIN);
+				return true;
+			}
+			else
+			{
+				modfd(EPOLLIN);
 				return false;
 			}
 		}
 	}
+}
+http_conn::LINE_STATUS http_conn::parse_line()
+{
+	/*要分析的字节范围是(http_checked_index～(http_read_index-1))　*/
+	char temp;
+	for (; http_checked_index < http_end_index; ++http_checked_index)
+	{
+		temp = http_read_buf[http_checked_index];
+		if (temp == '\r')
+		{
+			if ((http_checked_index + 1) == http_end_index)
+				return LINE_NOT_ENOUGH;
+			else if (http_read_buf[http_checked_index + 1] == '\n')
+			{
+				/*［xxx］＝＇＼0＇，xxx+1 */
+				http_read_buf[http_checked_index++] = '\0';
+				http_read_buf[http_checked_index++] = '\0';
+				return LINE_OK;
+			}
+			else
+				return LINE_BAD;
+		}
+		else if (temp == '\n')
+		{
+			if ((http_checked_index > 1) && http_read_buf[http_checked_index - 1] == '\r')
+			{
+				http_read_buf[http_checked_index - 1] = '\0';
+				http_read_buf[http_checked_index++] = '\0';
+				return LINE_OK;
+			}
+			else
+				return LINE_BAD;
+		}
+	}
+	return LINE_NOT_ENOUGH;
+}
+
+http_conn::HTTP_CODE http_conn::process_read()
+{
+	LINE_STATUS line_status = LINE_OK;		/*记录当前行的状态*/
+	HTTP_CODE retcode = REQUEST_NOT_ENOUGH; /*记录 http 请求的处理结果*/
+
+	/*主状态机，用于从　http_read_buf 中取出所有完整的行,并对应进行分析　*/
+	while (((http_check_state == CHECK_STATE_CONTENT) && (line_status == LINE_OK)) 
+	|| ((line_status = parse_line()) == LINE_OK))
+	{
+		char *temp = buffer + start_line;
+		start_line = checked_index; /*下一行的起始位置*/
+		switch (checkstate)
+		{
+			/*分析请求行*/
+		case CHECK_STATE_REQUESTLINE:
+			retcode = parse_requestline(temp, checkstate);
+			if (retcode == BAD_REQUEST)
+				return BAD_REQUEST;
+			checkstate = CHECK_STATE_HEADER;
+			break;
+
+			/*分析头部字段*/
+		case CHECK_STATE_HEADER:
+			retcode = parse_headers(temp);
+			if (retcode == BAD_REQUEST)
+				return BAD_REQUEST;
+			else if (retcode == GET_REQUEST)
+				return GET_REQUEST;
+			break;
+		default:
+			return SERVER_ERROR;
+		}
+	}
+	if (linestatus == LINE_OK)
+		return REQUEST_NOT_ENOUGH;
+	else
+		BAD_REQUEST;
+}
+
+void http_conn::http_close_conn()
+{
+	if (http_sockfd != -1)
+	{
+		Epoll_ctl(http_epollfd, EPOLL_CTL_DEL, http_sockfd, 0);
+		Close(http_sockfd);
+		http_sockfd = -1;
+		WebServer::sum_user_count--;
+	}
+}
+void http_conn::process()
+{
+	HTTP_CODE read_ret = process_read();
+	if (read_ret == REQUEST_NOT_ENOUGH)
+	{
+		modfd(EPOLLIN);
+		return;
+	}
+	bool write_ret = process_write(read_ret);
+
+	if (!write_ret)
+		http_close_conn();
+
+	modfd(EPOLLOUT);
 }
 #endif
