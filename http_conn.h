@@ -77,24 +77,7 @@ class http_conn
 	};
 
   public:
-	http_conn() : http_check_state(CHECK_STATE_REQUESTLINE),
-				  http_keep_connect(false),
-				  http_method(GET),
-				  http_url(nullptr),
-				  http_version(nullptr),
-				  http_content_length(0),
-
-				  http_host(nullptr),
-				  http_start_line(0),
-				  http_checked_index(0),
-				  http_end_index(0),
-				  http_write_count(0),
-				  http_read_buf("\0"),
-				  http_write_buf("\0"),
-				  http_real_file("\0")
-
-	{
-	}
+	http_conn() {}
 	~http_conn() {}
 
   public:
@@ -138,9 +121,9 @@ class http_conn
 	int http_write_count = 0;
 
 	/*主状态机所处的状态*/
-	CHECK_STATE http_check_state;
+	CHECK_STATE http_check_state = CHECK_STATE_REQUESTLINE;
 	/*请求的方法*/
-	METHOD http_method;
+	METHOD http_method = GET;
 
 	/*客户请求的目标文件的完整的路径，＝　root+url */
 	char http_real_file[FILENAME_LEN] = {0};
@@ -162,6 +145,8 @@ class http_conn
 	/*被写的内存块的数量*/
 	int http_iv_count = 0;
 };
+
+int http_conn::http_epollfd = -1 ;
 
 void http_conn::init()
 {
@@ -466,7 +451,7 @@ void http_conn::http_close_conn()
 		Epoll_ctl(http_epollfd, EPOLL_CTL_DEL, http_sockfd, 0);
 		Close(http_sockfd);
 		http_sockfd = -1;
-		WebServer::sum_user_count--;
+		//WebServer::sum_user_count--;必须解决的问题
 	}
 }
 void http_conn::process()
@@ -480,7 +465,6 @@ void http_conn::process()
 	/* bool write_ret = process_write(read_ret);
 	if (!write_ret)
 		http_close_conn();
-
 	modfd(EPOLLOUT); */
 }
 #endif

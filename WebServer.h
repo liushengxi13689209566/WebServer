@@ -36,8 +36,6 @@ class WebServer
   public:
 	WebServer(const char *ip, const int port)
 	{
-		listenfd = 0;
-		sum_user_count = 0;
 		start(ip, port);
 	}
 	~WebServer()
@@ -60,6 +58,9 @@ class WebServer
   public:
 	static int sum_user_count; /*总用户*/
 };
+int WebServer::listenfd = 0;
+int WebServer::sum_user_count = 0;
+
 void WebServer::Setnonblock(int fd)
 {
 	int old_option = fcntl(fd, F_GETFL);
@@ -105,7 +106,7 @@ void WebServer::WebServer_init(int epollfd,int connfd, const sockaddr_in &client
 	if (getsockopt(connfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
 		throw __LINE__;
 	addfd(epollfd, connfd, true);
-	sum_user_count++;
+	WebServer::sum_user_count++;
 	users[connfd].http_sockfd = connfd;
 	users[connfd].http_address = client_address;
 }
@@ -115,7 +116,7 @@ void WebServer::WebServer_closefd(int epollfd,int connfd)
 	{
 		removefd(epollfd,connfd);
 		users[connfd].http_sockfd = -1;
-		sum_user_count--;
+		this->sum_user_count--;
 	}
 }
 

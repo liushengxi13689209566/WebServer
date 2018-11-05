@@ -52,17 +52,25 @@ void Close(int fd)
 	if (close(fd) == -1)
 		throw __LINE__;
 }
-
+void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen)
+{
+	if (setsockopt(fd, level, optname, optval, optlen) < 0)
+		throw __LINE__;
+}
 /**********************************************************************************************************/
 int Epoll_create(int size)
 {
-	if (epoll_create(5) == -1)
+	int ret = 0;
+	if ((ret = epoll_create(5)) == -1)
 		throw __LINE__;
+	return (ret);
 }
 int Epoll_ctl(int epollfd, int op, int fd, struct epoll_event *event)
 {
-	if (epoll_ctl(epollfd, op, fd, event) == -1)
+	int ret = 0;
+	if ((ret = epoll_ctl(epollfd, op, fd, event)) == -1)
 		throw __LINE__;
+	return (ret);
 }
 int Epoll_wait(int epollfd, struct epoll_event *events, int maxevents, int timeout)
 {
@@ -70,4 +78,5 @@ int Epoll_wait(int epollfd, struct epoll_event *events, int maxevents, int timeo
 	/*epoll_wait　出错　*/
 	if ((ret < 0) && (errno != EINTR))
 		throw __LINE__;
+	return (ret);
 }
