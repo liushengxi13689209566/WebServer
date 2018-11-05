@@ -36,28 +36,29 @@ class WebServer
   public:
 	WebServer(const char *ip, const int port)
 	{
+		listenfd = 0;
+		sum_user_count = 0;
 		start(ip, port);
 	}
 	~WebServer()
 	{
-		Close(epollfd);
 		Close(listenfd);
 	}
 
   private:
 	void Setnonblock(int fd);
-	void addfd(int fd, bool one_shot);
-	void removefd(int fd);
+	void addfd(int epollfd, int fd, bool one_shot);
+	void removefd(int epollfd,int fd);
 	void addsig(int sig, void(handler)(int), bool restart = true);
 	int start(const char *ip, const int port);
-	void WebServer_init(int connfd, const sockaddr_in &client_address);
-	void WebServer_closefd(int connfd);
+	void WebServer_init(int epollfd,int connfd, const sockaddr_in &client_address);
+	void WebServer_closefd(int epollfd,int connfd);
 
   private:
-	static int listenfd = 0;
+	static int listenfd;
 	std::map<int, http_conn> users; /*任务类对象*/
   public:
-	static int sum_user_count = 0; /*总用户*/
+	static int sum_user_count; /*总用户*/
 };
 void WebServer::Setnonblock(int fd)
 {
@@ -65,7 +66,7 @@ void WebServer::Setnonblock(int fd)
 	int new_option = old_option | O_NONBLOCK;
 	fcntl(fd, F_SETFL, new_option);
 }
-void WebServer::addfd(int fd, bool one_shot)
+void WebServer::addfd(int epollfd, int fd, bool one_shot)
 {
 	epoll_event event;
 	event.data.fd = fd;
@@ -75,7 +76,7 @@ void WebServer::addfd(int fd, bool one_shot)
 	Epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
 	Setnonblock(fd);
 }
-void WebServer::removefd(int fd)
+void WebServer::removefd(int epollfd,int fd)
 {
 	Epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, 0);
 	Close(fd);
@@ -96,23 +97,23 @@ void WebServer::addsig(int sig, void(handler)(int), bool restart)
 	if (sigaction(sig, &sa, NULL) == -1)
 		throw __LINE__;
 }
-void WebServer::WebServer_init(int connfd, const sockaddr_in &client_address)
+void WebServer::WebServer_init(int epollfd,int connfd, const sockaddr_in &client_address)
 {
 	int error = 0;
 	socklen_t len = sizeof(error);
 	/*处理错误*/
 	if (getsockopt(connfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
 		throw __LINE__;
-	addfd(connfd, true);
+	addfd(epollfd, connfd, true);
 	sum_user_count++;
 	users[connfd].http_sockfd = connfd;
 	users[connfd].http_address = client_address;
 }
-void WebServer::WebServer_closefd(int connfd)
+void WebServer::WebServer_closefd(int epollfd,int connfd)
 {
 	if (users[connfd].http_sockfd != -1)
 	{
-		removefd(connfd);
+		removefd(epollfd,connfd);
 		users[connfd].http_sockfd = -1;
 		sum_user_count--;
 	}
@@ -144,7 +145,7 @@ int WebServer::start(const char *ip, const int port)
 	Listen(listenfd, 5);
 	epoll_event events[MAX_EVENT_NUMBER];
 	int epollfd = Epoll_create(5);
-	addfd(listenfd, false);
+	addfd(epollfd, listenfd, false);
 	http_conn::http_epollfd = epollfd;
 
 	while (true)
@@ -165,13 +166,13 @@ int WebServer::start(const char *ip, const int port)
 					continue;
 				}
 				/*如果不存在会直接插入 map<connfd,http_conn> 进去*/
-				WebServer_init(connfd, client_address);
+				WebServer_init(epollfd,connfd, client_address);
 			}
 			/*出错*/
 			else if (events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
 			{
 				/*如果有异常，直接关闭客户连接*/
-				WebServer_closefd(sockfd);
+				WebServer_closefd(epollfd,sockfd);
 			}
 			/*读事件*/
 			else if (events[i].events & EPOLLIN)
@@ -179,13 +180,13 @@ int WebServer::start(const char *ip, const int port)
 				if (users[sockfd].read())
 					pool.append(&users[sockfd]);
 				else
-					WebServer_closefd(sockfd);
+					WebServer_closefd(epollfd,sockfd);
 			}
 			/*写事件*/
 			else if (events[i].events & EPOLLOUT)
 			{
 				if (!users[sockfd].write())
-					WebServer_closefd(sockfd);
+					WebServer_closefd(epollfd,sockfd);
 			}
 			/*其他*/
 			else

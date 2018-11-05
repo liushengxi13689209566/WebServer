@@ -20,9 +20,12 @@
 #include <cassert>
 #include <sys/epoll.h>
 #include <sys/uio.h>
+#include <sys/stat.h>
 
 #include "system_call.h"
 #include "WebServer.h"
+
+const char *doc_root = "./index.html";
 
 /*任务类*/
 class http_conn
@@ -56,11 +59,14 @@ class http_conn
 	enum HTTP_CODE
 	{
 		REQUEST_NOT_ENOUGH, /*请求不完整，继续读取客户端*/
-		ENOUGH_REQUEST,		/*读取到一个完整请求*/
-		BAD_REQUEST,		/*请求有语法错误*/
-		FORBIDDEN_REQUEST,  /*客户对该资源无权限*/
-		SERVER_ERROR,		/*服务器出错*/
-		CLOSED_CONNECTION   /*客户端关闭了连接*/
+		GET_REQUEST,		/*读取到一个完整请求*/
+		POST_REQUEST,
+		BAD_REQUEST,	   /*请求有语法错误*/
+		FORBIDDEN_REQUEST, /*客户对该资源无权限*/
+		NO_RESOURCE,	   /*无此资源，发送404页面*/
+		FILE_REQUEST,
+		SERVER_ERROR,	 /*服务器出错*/
+		CLOSED_CONNECTION /*客户端关闭了连接*/
 	};
 	/*行的读取状态：有可能一行数据都没有一次性传输完毕，需要继续进行传输*/
 	enum LINE_STATUS
@@ -106,6 +112,10 @@ class http_conn
   private:
 	/*process_read 所使用的函数*/
 	LINE_STATUS parse_line();
+	HTTP_CODE parse_request_line(char *line);
+	HTTP_CODE parse_headers(char *line);
+	HTTP_CODE parse_content(char *line);
+	HTTP_CODE do_get_request();
 
   public:
 	/*该连接的sockfd和对方的地址*/
@@ -145,11 +155,9 @@ class http_conn
 	/*是否需要保持连接*/
 	bool http_keep_connect = false;
 
-	/*客户请求的目标文件被mmap到内存中的起始位置*/
-	char *http_file_address = nullptr;
 	/*目标文件的状态，通过他判断是否需要发送　404　，以及文件大小等等*/
 	struct stat http_file_stat;
-	/*writev 集中写，尽量去避免复制操作，出发一次写操作*/
+	/*writev 集中写，尽量去避免复制操作，触发一次写操作*/
 	struct iovec http_iv[2];
 	/*被写的内存块的数量*/
 	int http_iv_count = 0;
@@ -283,45 +291,174 @@ http_conn::LINE_STATUS http_conn::parse_line()
 	return LINE_NOT_ENOUGH;
 }
 
+/*分析请求行*/
+http_conn::HTTP_CODE http_conn::parse_request_line(char *line)
+{
+	http_url = strpbrk(line, " \t");
+	if (http_url == NULL)
+	{
+		return BAD_REQUEST;
+	}
+	*http_url++ = '\0';
+
+	char *method = line;
+	if (strcasecmp(method, "GET") == 0)
+	{
+		http_method = GET;
+	}
+	else
+	{
+		return BAD_REQUEST;
+	}
+	http_url += strspn(http_url, " \t"); /*跳过分隔符*/
+
+	http_version = strpbrk(http_url, " \t");
+	if (http_version == NULL)
+	{
+		return BAD_REQUEST;
+	}
+	*http_version++ = '\0';
+	http_version += strspn(http_version, " \t");
+
+	/*这里可以处理一些http版本的一些信息*/
+
+	/*检查url是否合法*/
+	if (strncasecmp(http_url, "http://", 7) == 0)
+	{
+		http_url += 7;
+		http_url = strchr(http_url, '/');
+	}
+	if (!http_url || http_url[0] != '/')
+		return BAD_REQUEST;
+	printf("http_url ==%s\n", http_url);
+	http_check_state = CHECK_STATE_HEADER;
+	return REQUEST_NOT_ENOUGH;
+}
+/*一行一行的分析头部字段*/
+http_conn::HTTP_CODE http_conn::parse_headers(char *line)
+{
+	if (line[0] == '\0')
+	{
+		if (http_method == HEAD)
+		{
+			return GET_REQUEST;
+		}
+		if (http_content_length != 0)
+		{
+			http_check_state = CHECK_STATE_CONTENT;
+			return REQUEST_NOT_ENOUGH;
+		}
+		return GET_REQUEST;
+	}
+	else if (strncasecmp(line, "Connection:", 11) == 0)
+	{
+		line += 11;
+		line += strspn(line, " \t");
+		if (strcasecmp(line, "keep-alive") == 0)
+		{
+			http_keep_connect = true;
+		}
+	}
+	else if (strncasecmp(line, "Content-Length:", 15) == 0)
+	{
+		line += 15;
+		line += strspn(line, " \t");
+		http_content_length = atol(line);
+	}
+	else if (strncasecmp(line, "Host:", 5) == 0)
+	{
+		line += 5;
+		line += strspn(line, " \t");
+		http_host = line;
+	}
+	else
+	{
+		printf("unknow header %s\n", line);
+	}
+	return REQUEST_NOT_ENOUGH;
+}
+/*分析消息体*/
+http_conn::HTTP_CODE http_conn::parse_content(char *line)
+{
+	if (http_end_index >= (http_content_length + http_checked_index))
+	{
+		line[http_content_length] = '\0';
+		return GET_REQUEST;
+	}
+	return REQUEST_NOT_ENOUGH;
+}
+http_conn::HTTP_CODE http_conn::do_get_request()
+{
+	strcpy(http_real_file, doc_root);
+	int len = strlen(doc_root);
+	strncpy(http_real_file + len, http_url, FILENAME_LEN - 1 - len);
+	if (stat(http_real_file, &http_file_stat) < 0)
+	{
+		return NO_RESOURCE;
+	}
+	if (!(http_file_stat.st_mode & S_IROTH))
+	{
+		return FORBIDDEN_REQUEST;
+	}
+	if (S_ISDIR(http_file_stat.st_mode))
+	{
+		return BAD_REQUEST;
+	}
+	return FILE_REQUEST;
+}
 http_conn::HTTP_CODE http_conn::process_read()
 {
 	LINE_STATUS line_status = LINE_OK;		/*记录当前行的状态*/
 	HTTP_CODE retcode = REQUEST_NOT_ENOUGH; /*记录 http 请求的处理结果*/
-
+	char *line = nullptr;
 	/*主状态机，用于从　http_read_buf 中取出所有完整的行,并对应进行分析　*/
-	while (((http_check_state == CHECK_STATE_CONTENT) && (line_status == LINE_OK)) 
-	|| ((line_status = parse_line()) == LINE_OK))
+	while (((http_check_state == CHECK_STATE_CONTENT) && (line_status == LINE_OK)) || ((line_status = parse_line()) == LINE_OK))
 	{
-		char *temp = buffer + start_line;
-		start_line = checked_index; /*下一行的起始位置*/
-		switch (checkstate)
+		line = http_read_buf + http_start_line;
+		http_start_line = http_checked_index; /*下一行的起始位置*/
+		printf("get a line :%s \n", line);
+
+		switch (http_check_state)
 		{
 			/*分析请求行*/
 		case CHECK_STATE_REQUESTLINE:
-			retcode = parse_requestline(temp, checkstate);
+		{
+			retcode = parse_request_line(line);
 			if (retcode == BAD_REQUEST)
 				return BAD_REQUEST;
-			checkstate = CHECK_STATE_HEADER;
 			break;
-
+		}
 			/*分析头部字段*/
 		case CHECK_STATE_HEADER:
-			retcode = parse_headers(temp);
+		{
+			retcode = parse_headers(line);
 			if (retcode == BAD_REQUEST)
 				return BAD_REQUEST;
 			else if (retcode == GET_REQUEST)
-				return GET_REQUEST;
+				return do_get_request();
+			else if (retcode == POST_REQUEST)
+				//return do_post_request();
+				;
 			break;
+		}
+		case CHECK_STATE_CONTENT:
+		{
+			retcode = parse_content(line);
+			if (retcode == GET_REQUEST)
+			{
+				return do_get_request();
+			}
+			line_status = LINE_NOT_ENOUGH;
+			break;
+		}
 		default:
+		{
 			return SERVER_ERROR;
 		}
+		}
 	}
-	if (linestatus == LINE_OK)
-		return REQUEST_NOT_ENOUGH;
-	else
-		BAD_REQUEST;
+	return REQUEST_NOT_ENOUGH;
 }
-
 void http_conn::http_close_conn()
 {
 	if (http_sockfd != -1)
@@ -340,11 +477,10 @@ void http_conn::process()
 		modfd(EPOLLIN);
 		return;
 	}
-	bool write_ret = process_write(read_ret);
-
+	/* bool write_ret = process_write(read_ret);
 	if (!write_ret)
 		http_close_conn();
 
-	modfd(EPOLLOUT);
+	modfd(EPOLLOUT); */
 }
 #endif
