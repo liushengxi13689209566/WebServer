@@ -52,6 +52,27 @@ void Close(int fd)
 	if (close(fd) == -1)
 		throw __LINE__;
 }
+ssize_t Sendlen(int fd, const void *buf, size_t len, int flags)
+{
+	ssize_t n = 0;
+	size_t sum = 0;
+	const char *ptr;
+	ptr = (const char *)buf;
+	while (sum < len)
+	{
+		n = send(fd, (void *)ptr, len - sum, flags);
+		if (n < 0)
+		{
+			if (errno == EINTR)
+				n = 0;
+			else
+				throw __LINE__;
+		}
+		sum += n;
+		ptr += n;
+	}
+	return (sum);
+}
 void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen)
 {
 	if (setsockopt(fd, level, optname, optval, optlen) < 0)

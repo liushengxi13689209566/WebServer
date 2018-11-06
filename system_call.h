@@ -37,10 +37,12 @@ void Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *sa, socklen_t *salenptr);
 void Close(int fd);
 void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen);
+ssize_t Sendlen(int fd, const void *buf, size_t len, int flags);
 
 /*epoll*/
 int Epoll_create(int size);
 int Epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
-int Epoll_wait(int epfd, struct epoll_event *events,int maxevents, int timeout);
-
+int Epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+/*　其他stdio 函数*/
+int Snprintf(char *str, size_t size, const char *format, ...);
 #endif
