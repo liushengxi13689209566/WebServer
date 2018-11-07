@@ -44,5 +44,5 @@ int Epoll_create(int size);
 int Epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 int Epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
 /*　其他stdio 函数*/
-int Snprintf(char *str, size_t size, const char *format, ...);
+
 #endif

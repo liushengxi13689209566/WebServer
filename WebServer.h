@@ -46,11 +46,11 @@ class WebServer
   private:
 	void Setnonblock(int fd);
 	void addfd(int epollfd, int fd, bool one_shot);
-	void removefd(int epollfd,int fd);
+	void removefd(int epollfd, int fd);
 	void addsig(int sig, void(handler)(int), bool restart = true);
 	int start(const char *ip, const int port);
-	void WebServer_init(int epollfd,int connfd, const sockaddr_in &client_address);
-	void WebServer_closefd(int epollfd,int connfd);
+	void WebServer_init(int epollfd, int connfd, const sockaddr_in &client_address);
+	void WebServer_closefd(int epollfd, int connfd);
 
   private:
 	static int listenfd;
@@ -77,7 +77,7 @@ void WebServer::addfd(int epollfd, int fd, bool one_shot)
 	Epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
 	Setnonblock(fd);
 }
-void WebServer::removefd(int epollfd,int fd)
+void WebServer::removefd(int epollfd, int fd)
 {
 	Epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, 0);
 	Close(fd);
@@ -98,7 +98,7 @@ void WebServer::addsig(int sig, void(handler)(int), bool restart)
 	if (sigaction(sig, &sa, NULL) == -1)
 		throw __LINE__;
 }
-void WebServer::WebServer_init(int epollfd,int connfd, const sockaddr_in &client_address)
+void WebServer::WebServer_init(int epollfd, int connfd, const sockaddr_in &client_address)
 {
 	int error = 0;
 	socklen_t len = sizeof(error);
@@ -110,11 +110,11 @@ void WebServer::WebServer_init(int epollfd,int connfd, const sockaddr_in &client
 	users[connfd].http_sockfd = connfd;
 	users[connfd].http_address = client_address;
 }
-void WebServer::WebServer_closefd(int epollfd,int connfd)
+void WebServer::WebServer_closefd(int epollfd, int connfd)
 {
 	if (users[connfd].http_sockfd != -1)
 	{
-		removefd(epollfd,connfd);
+		removefd(epollfd, connfd);
 		users[connfd].http_sockfd = -1;
 		this->sum_user_count--;
 	}
@@ -167,27 +167,29 @@ int WebServer::start(const char *ip, const int port)
 					continue;
 				}
 				/*如果不存在会直接插入 map<connfd,http_conn> 进去*/
-				WebServer_init(epollfd,connfd, client_address);
+				WebServer_init(epollfd, connfd, client_address);
 			}
 			/*出错*/
 			else if (events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
 			{
 				/*如果有异常，直接关闭客户连接*/
-				WebServer_closefd(epollfd,sockfd);
+				WebServer_closefd(epollfd, sockfd);
 			}
 			/*读事件*/
 			else if (events[i].events & EPOLLIN)
 			{
+				printf("读事件\n");
 				if (users[sockfd].read())
 					pool.append(&users[sockfd]);
 				else
-					WebServer_closefd(epollfd,sockfd);
+					WebServer_closefd(epollfd, sockfd);
 			}
 			/*写事件*/
 			else if (events[i].events & EPOLLOUT)
 			{
+				printf("写事件\n");
 				if (!users[sockfd].write())
-					WebServer_closefd(epollfd,sockfd);
+					WebServer_closefd(epollfd, sockfd);
 			}
 			/*其他*/
 			else

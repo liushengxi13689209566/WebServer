@@ -214,7 +214,6 @@ bool http_conn::send_header()
 {
 	printf("进入http_conn::send_header 函数\n");
 	printf("http_real_file ==  %s\n", http_real_file);
-	printf("http_real_file ==  %s\n", http_real_file);
 
 	if (Sendlen(http_sockfd, http_header_buf, strlen(http_header_buf), 0) == -1)
 		return false;
@@ -224,13 +223,17 @@ bool http_conn::send_header()
 /*通过所有检测，只是单纯的发送文件，响应请求*/
 bool http_conn::write()
 {
-	printf(" 进入http_conn::write函数\n" );
+	printf(" 进入http_conn::write函数\n");
 
 	send_header();
+	printf("出 send_header 函数\n ");
 	/*打开文件*/
 	int http_real_file_fd = open(http_real_file, O_RDONLY);
 	int ret = 0;
-	ssize_t bytes_have_send = 0;
+	
+	sendfile(http_sockfd, http_real_file_fd, NULL, http_file_stat.st_size);
+
+	/* ssize_t bytes_have_send = 0;
 	while (bytes_have_send != http_file_stat.st_size)
 	{
 		ret = sendfile(http_sockfd, http_real_file_fd, &bytes_have_send, http_file_stat.st_size - bytes_have_send);
@@ -247,7 +250,7 @@ bool http_conn::write()
 		{
 			bytes_have_send += ret;
 		}
-	}
+	} */
 	Close(http_real_file_fd);
 
 	if (http_keep_connect)
@@ -478,7 +481,7 @@ http_conn::HTTP_CODE http_conn::process_read()
 
 	printf("出 process_read() 函数\n");
 
-	 return REQUEST_NOT_ENOUGH;
+	return REQUEST_NOT_ENOUGH;
 }
 void http_conn::http_close_conn()
 {
@@ -493,13 +496,16 @@ void http_conn::http_close_conn()
 
 void http_conn::add_status_line(int status, const char *title)
 {
-	int ret = Snprintf(http_header_buf, HEADER_BUFFERSIZE - 1, "HTTP/1.1 %d %s\r\n", status, title);
+	http_header_index = 0;
+	printf("1.addd_status_line : http_header_buf ==%s\n", http_header_buf);
+	int ret = snprintf(http_header_buf, HEADER_BUFFERSIZE - 1, "HTTP/1.1 %d %s\r\n", status, title);
 	http_header_index += ret;
+	printf("2.addd_status_line : http_header_buf ==%s\n", http_header_buf);
 }
 void http_conn::add_header()
 {
 	int &index = http_header_index;
-	int ret = Snprintf(http_header_buf + index,
+	int ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "Connection: %s\r\n",
 					   (http_keep_connect == true)
@@ -509,41 +515,45 @@ void http_conn::add_header()
 	/*添加文件类型*/
 	std::string tmp = http_real_file;
 	if (tmp.find(".html") != std::string::npos)
-		ret = Snprintf(http_header_buf + index,
+		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: text/html\r\n;charset=utf-8\r\n");
 	if (tmp.find(".jpg") != std::string::npos)
-		ret = Snprintf(http_header_buf + index,
+		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: image/jpg\r\n;charset=utf-8\r\n");
 	if (tmp.find(".png") != std::string::npos)
-		ret = Snprintf(http_header_buf + index,
+		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: image/png\r\n;charset=utf-8\r\n");
 	if (tmp.find(".ico") != std::string::npos)
-		ret = Snprintf(http_header_buf + index,
+		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: image/x-icon\r\n;charset=utf-8\r\n");
 	if (tmp.find(".mp3") != std::string::npos)
-		ret = Snprintf(http_header_buf + index,
+		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: audio/mp3\r\n;charset=utf-8\r\n");
 	if (tmp.find(".mp4") != std::string::npos)
-		ret = Snprintf(http_header_buf + index,
+		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: video/mpeg4\r\n;charset=utf-8\r\n");
 
 	index += ret;
 
 	/*添加空白行*/
-	ret = Snprintf(http_header_buf + index,
+	ret = snprintf(http_header_buf + index,
 				   HEADER_BUFFERSIZE - 1 - index,
 				   "%s", "\r\n");
 	index += ret;
+
+	printf("addd_header : http_header_buf ==%s\n", http_header_buf);
 }
 
 bool http_conn::process_write(HTTP_CODE ret)
 {
+	printf("进入process_write 函数\n");
+
 	switch (ret)
 	{
 	case FILE_REQUEST:
@@ -561,6 +571,9 @@ bool http_conn::process_write(HTTP_CODE ret)
 	{
 	}
 	}
+
+	printf("出　process_write 函数\n");
+
 	return true;
 }
 void http_conn::process()
@@ -571,7 +584,7 @@ void http_conn::process()
 		modfd(EPOLLIN);
 		return;
 	}
-	
+
 	printf("))))))))))))))))))))))))))))))))))\n");
 
 	bool write_ret = process_write(read_ret);
@@ -579,6 +592,9 @@ void http_conn::process()
 	{
 		http_close_conn();
 	}
+
+	printf("修改事件类型\n");
+
 	modfd(EPOLLOUT); /*这里触发写事件*/
 }
 #endif
