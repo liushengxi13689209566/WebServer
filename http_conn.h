@@ -231,17 +231,16 @@ bool http_conn::write()
 	int http_real_file_fd = open(http_real_file, O_RDONLY);
 	int ret = 0;
 	// 双"//"都表示测试语句
-	//sendfile(http_sockfd, http_real_file_fd, NULL, http_file_stat.st_size);
-	ssize_t bytes_have_send = 0;
+	sendfile(http_sockfd, http_real_file_fd, NULL, http_file_stat.st_size);
+	/* ssize_t bytes_have_send = 0;
 	while (bytes_have_send != http_file_stat.st_size)
 	{
-		ret = sendfile(http_sockfd, http_real_file_fd, &bytes_have_send, http_file_stat.st_size - bytes_have_send);
+		ret = sendfile(http_sockfd, http_real_file_fd, 
+		&bytes_have_send, http_file_stat.st_size - bytes_have_send);
 		if (ret == -1)
 		{
 			if (errno == EAGAIN)
-			{
 				continue;
-			}
 			else
 				return false;
 		}
@@ -249,7 +248,7 @@ bool http_conn::write()
 		{
 			bytes_have_send += ret;
 		}
-	}
+	} */
 	Close(http_real_file_fd);
 
 	if (http_keep_connect)
