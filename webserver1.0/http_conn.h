@@ -185,6 +185,8 @@ void http_conn::modfd(int ev)
 /*循环读取客户数据，直到无数据可读或者对方关闭连接*/
 bool http_conn::read()
 {
+	printf("进入　read 函数 \n");
+
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
 	int readed_bytes = 0;
@@ -232,6 +234,7 @@ bool http_conn::write()
 	int ret = 0;
 	// 双"//"都表示测试语句
 	sendfile(http_sockfd, http_real_file_fd, NULL, http_file_stat.st_size);
+	printf("出 sendfile响应 函数 结束　\n ");
 	/* ssize_t bytes_have_send = 0;
 	while (bytes_have_send != http_file_stat.st_size)
 	{

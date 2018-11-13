@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 	try
 	{
 		WebServer my(ip, port);
+		my.run();
 	}
 	catch (const int &line_number)
 	{

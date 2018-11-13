@@ -179,8 +179,14 @@ int WebServer::start(const char *ip, const int port)
 			else if (events[i].events & EPOLLIN)
 			{
 				printf("读事件\n");
-				if (users[sockfd].read())
-					pool.append(&users[sockfd]);
+				if (users[sockfd].read()){
+
+					printf("读事件　完成！！！\n");
+
+					if(!pool.append(&users[sockfd])){
+						printf("append 失败！！！！\n");
+					}
+				}
 				else
 					WebServer_closefd(epollfd, sockfd);
 			}
