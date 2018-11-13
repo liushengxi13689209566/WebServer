@@ -24,8 +24,8 @@
 #include <map>
 
 #include "http_conn.h"
-#include "threadPool.h"
-#include "system_call.h"
+#include "../threadPool.h"
+#include "./base_function.h"
 
 const int MAX_FD = 65536;
 const int MAX_EVENT_NUMBER = 10000;
@@ -134,10 +134,6 @@ int WebServer::start(const char *ip, const int port)
 	address.sin_port = htons(port);
 
 	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
-	/*close()立刻返回，不会发送(未发送完成)的数据，而是通过一个REST包强制的关闭socket描述符，即强制退出。*/
-	struct linger tmp = {1, 0};
-	Setsockopt(listenfd, SOL_SOCKET, SO_LINGER, &tmp, sizeof(tmp));
-
 	/*设置该套接字使之可以重新绑定端口 */
 	int optval = 1;
 	Setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (int *)&optval, sizeof(int));
@@ -179,16 +175,19 @@ int WebServer::start(const char *ip, const int port)
 			else if (events[i].events & EPOLLIN)
 			{
 				printf("读事件\n");
-				if (users[sockfd].read()){
-
+				if (users[sockfd].read())
+				{
 					printf("读事件　完成！！！\n");
-
-					if(!pool.append(&users[sockfd])){
+					if (!pool.append(&users[sockfd]))
+					{
 						printf("append 失败！！！！\n");
 					}
 				}
 				else
+				{
+					printf("读时间失败\n");
 					WebServer_closefd(epollfd, sockfd);
+				}
 			}
 			/*写事件*/
 			else if (events[i].events & EPOLLOUT)

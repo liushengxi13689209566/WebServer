@@ -30,13 +30,25 @@
 const int MAX_FD = 65536;
 const int MAX_EVENT_NUMBER = 10000;
 
+const char *doc_root = "./index.html";
+const char *ok_200_title = "OK";
+const char *error_500_title = "Serverr error";
+const char *error_500_path = "./500.html";
+const char *error_404_path = "./404.html";
+
 /*服务器类*/
 class WebServer
 {
   public:
-	WebServer(const char *ip, const int port)
+	/*文件名最大长度*/
+	static const int FILENAME_LEN = 200;
+	/*读缓冲区大小*/
+	static const int READ_BUFFERSIZE = 2048;
+	/*写头部缓冲区大小*/
+	static const int HEADER_BUFFERSIZE = 1024;
+
+	WebServer(const char *ip, const int port) :
 	{
-		start(ip, port);
 	}
 	~WebServer()
 	{
@@ -44,9 +56,6 @@ class WebServer
 	}
 
   private:
-	void Setnonblock(int fd);
-	void addfd(int epollfd, int fd, bool one_shot);
-	void removefd(int epollfd, int fd);
 	void addsig(int sig, void(handler)(int), bool restart = true);
 	int start(const char *ip, const int port);
 	void WebServer_init(int epollfd, int connfd, const sockaddr_in &client_address);
@@ -54,10 +63,11 @@ class WebServer
 
   private:
 	static int listenfd;
-	std::map<int, http_conn> users; /*任务类对象*/
-  public:
+	static int epollfd;
 	static int sum_user_count; /*总用户*/
+
 };
+
 int WebServer::listenfd = 0;
 int WebServer::sum_user_count = 0;
 
@@ -176,11 +186,13 @@ int WebServer::start(const char *ip, const int port)
 			else if (events[i].events & EPOLLIN)
 			{
 				printf("读事件\n");
-				if (users[sockfd].read()){
+				if (users[sockfd].read())
+				{
 
 					printf("读事件　完成！！！\n");
 
-					if(!pool.append(&users[sockfd])){
+					if (!pool.append(&users[sockfd]))
+					{
 						printf("append 失败！！！！\n");
 					}
 				}

@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sys/sendfile.h>
 
-#include "system_call.h"
+#include "./base_function.h"
 #include "WebServer.h"
 
 const char *doc_root = "./index.html";
@@ -84,7 +84,9 @@ class http_conn
 	};
 
   public:
-	http_conn() {}
+	http_conn() {
+		init();
+	}
 	~http_conn() {}
 
   public:
@@ -186,12 +188,15 @@ void http_conn::modfd(int ev)
 bool http_conn::read()
 {
 	printf("进入　read 函数 \n");
+	printf("http_end_index ==%d\n",http_end_index);
 
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
 	int readed_bytes = 0;
 	while (true)
 	{
+		printf("开始　recv \n");
+
 		readed_bytes = recv(http_sockfd, http_read_buf + http_end_index, READ_BUFFERSIZE - http_end_index, 0);
 		if (readed_bytes == -1)
 		{
@@ -204,6 +209,7 @@ bool http_conn::read()
 			return false;
 		http_end_index += readed_bytes;
 	}
+	printf("出 read 函数　\n");
 	return true;
 }
 
@@ -585,7 +591,6 @@ void http_conn::process()
 		modfd(EPOLLIN);
 		return;
 	}
-
 	printf("))))))))))))))))))))))))))))))))))\n");
 
 	bool write_ret = process_write(read_ret);

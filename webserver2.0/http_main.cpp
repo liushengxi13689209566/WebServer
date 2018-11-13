@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
 	const int port = atoi(argv[2]);
 	try
 	{
-		WebServer my(ip, port);
-		my.run();
+		WebServer my;
+		my.run(ip,port);
 	}
 	catch (const int &line_number)
 	{

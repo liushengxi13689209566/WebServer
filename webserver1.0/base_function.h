@@ -36,8 +36,11 @@ int Bind(int fd, const struct sockaddr *sa, socklen_t salen);
 void Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *sa, socklen_t *salenptr);
 void Close(int fd);
-void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen);
 ssize_t Sendlen(int fd, const void *buf, size_t len, int flags);
+
+/*关于socket的一些设置函数*/
+void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen);
+
 
 /*epoll*/
 int Epoll_create(int size);

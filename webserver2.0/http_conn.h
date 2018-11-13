@@ -26,22 +26,12 @@
 #include "../system_call.h"
 #include "WebServer.h"
 
-const char *doc_root = "./index.html";
-const char *ok_200_title = "OK";
-const char *error_500_title = "Serverr error";
-const char *error_500_path = "./500.html";
-const char *error_404_path = "./404.html";
+
 
 /*任务类*/
 class http_conn
 {
   public:
-	/*文件名最大长度*/
-	static const int FILENAME_LEN = 200;
-	/*读缓冲区大小*/
-	static const int READ_BUFFERSIZE = 2048;
-	/*写头部缓冲区大小*/
-	static const int HEADER_BUFFERSIZE = 1024;
 	/* http 请求方法，目前只支持 get */
 	enum METHOD
 	{
@@ -115,11 +105,7 @@ class http_conn
 	void add_status_line(int status, const char *title);
 	void add_header();
 
-  public:
-	/*该连接的sockfd和对方的地址*/
-	int http_sockfd = 0;
-	sockaddr_in http_address;
-	static int http_epollfd;
+
 
   private:
 	/*读缓冲区*/

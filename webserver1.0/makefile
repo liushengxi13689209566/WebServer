@@ -5,4 +5,4 @@ LIBRARY= -lpthread
 FILE = webserver
 
 all:
-	${CC} http_main.cpp  ./sys_call/*.cpp -Wall -std=c++11 -o ${FILE} ${DEBUG} ${LIBRARY}
+	${CC} http_main.cpp  ./base_funtion/*.cpp -Wall -std=c++11 -o ${FILE} ${DEBUG} ${LIBRARY}

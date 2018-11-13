@@ -1,0 +1,170 @@
+创建第0个线程 
+创建第1个线程 
+创建第2个线程 
+创建第3个线程 
+创建第4个线程 
+创建第5个线程 
+创建第6个线程 
+创建第7个线程 
+读事件
+进入　read 函数 
+http_end_index ==0
+开始　recv 
+开始　recv 
+读事件　完成！！！
+get a line :GET / HTTP/1.1 
+http_url ==/
+get a line :User-Agent: WebBench 1.5 
+unknow head :User-Agent: WebBench 1.5
+get a line :Host: 127.0.0.1 
+get a line :Connection: close 
+get a line : 
+*********************************do_get_request ::http_real_file ==  
+do_get_request ::http_real_file == ./index.html
+出 do_get_request 函数　
+))))))))))))))))))))))))))))))))))
+进入process_write 函数
+1.addd_status_line : http_header_buf ==
+2.addd_status_line : http_header_buf ==HTTP/1.1 200 OK
+
+addd_header : http_header_buf ==HTTP/1.1 200 OK
+Connection: close
+Content-Type: text/html
+;charset=utf-8
+
+
+出　process_write 函数
+修改事件类型
+写事件
+ 进入http_conn::write函数
+进入http_conn::send_header 函数
+http_real_file ==  ./index.html
+出 send_header 函数
+ 出 sendfile响应 函数 结束　
+ 读事件
+进入　read 函数 
+http_end_index ==80
+开始　recv 
+开始　recv 
+读事件　完成！！！
+出 process_read() 函数
+读事件
+进入　read 函数 
+http_end_index ==80
+开始　recv 
+开始　recv 
+读事件　完成！！！
+出 process_read() 函数
+读事件
+进入　read 函数 
+http_end_index ==0
+开始　recv 
+开始　recv 
+读事件　完成！！！
+get a line :GET / HTTP/1.1 
+http_url ==/
+get a line :User-Agent: WebBench 1.5 
+unknow head :User-Agent: WebBench 1.5
+get a line :Host: 127.0.0.1 
+get a line :Connection: close 
+get a line : 
+*********************************do_get_request ::http_real_file ==  
+do_get_request ::http_real_file == ./index.html
+出 do_get_request 函数　
+))))))))))))))))))))))))))))))))))
+进入process_write 函数
+1.addd_status_line : http_header_buf ==
+2.addd_status_line : http_header_buf ==HTTP/1.1 200 OK
+
+addd_header : http_header_buf ==HTTP/1.1 200 OK
+Connection: close
+Content-Type: text/html
+;charset=utf-8
+
+
+出　process_write 函数
+修改事件类型
+写事件
+ 进入http_conn::write函数
+进入http_conn::send_header 函数
+http_real_file ==  ./index.html
+出 send_header 函数
+ 出 sendfile响应 函数 结束　
+ 读事件
+进入　read 函数 
+http_end_index ==0
+开始　recv 
+开始　recv 
+读事件　完成！！！
+读事件
+进入　read 函数 
+http_end_index ==80
+开始　recv 
+开始　recv 
+读事件　完成！！！
+读事件
+进入　read 函数 
+http_end_index ==0
+开始　recv 
+开始　recv 
+读事件　完成！！！
+get a line :GET / HTTP/1.1 
+http_url ==/
+get a line :User-Agent: WebBench 1.5 
+unknow head :User-Agent: WebBench 1.5
+get a line :Host: 127.0.0.1 
+get a line :Connection: close 
+get a line : 
+*********************************do_get_request ::http_real_file ==  
+do_get_request ::http_real_file == ./index.html
+读事件
+进入　read 函数 
+http_end_index ==0
+开始　recv 
+开始　recv 
+读事件　完成！！！
+出 do_get_request 函数　
+))))))))))))))))))))))))))))))))))
+进入process_write 函数
+1.addd_status_line : http_header_buf ==
+2.addd_status_line : http_header_buf ==HTTP/1.1 200 OK
+
+addd_header : http_header_buf ==HTTP/1.1 200 OK
+Connection: close
+Content-Type: text/html
+;charset=utf-8
+
+
+出　process_write 函数
+修改事件类型
+出 process_read() 函数
+get a line :GET / HTTP/1.1 
+http_url ==/
+get a line :User-Agent: WebBench 1.5 
+unknow head :User-Agent: WebBench 1.5
+get a line :Host: 127.0.0.1 
+get a line :Connection: close 
+get a line : 
+*********************************do_get_request ::http_real_file ==  
+do_get_request ::http_real_file == ./index.html
+出 do_get_request 函数　
+))))))))))))))))))))))))))))))))))
+进入process_write 函数
+1.addd_status_line : http_header_buf ==
+2.addd_status_line : http_header_buf ==HTTP/1.1 200 OK
+
+addd_header : http_header_buf ==HTTP/1.1 200 OK
+Connection: close
+Content-Type: text/html
+;charset=utf-8
+
+
+出　process_write 函数
+修改事件类型
+get a line :GET / HTTP/1.1 
+http_url ==/
+get a line :User-Agent: WebBench 1.5 
+unknow head :User-Agent: WebBench 1.5
+get a line :Host: 127.0.0.1 
+get a line :Connection: close 
+get a li
