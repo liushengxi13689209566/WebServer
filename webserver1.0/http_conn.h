@@ -84,12 +84,14 @@ class http_conn
 	};
 
   public:
-	http_conn() {
+	http_conn()
+	{
 		init();
 	}
 	~http_conn() {}
 
   public:
+	void init();
 	bool read();
 	bool write();
 	/*write 调用的函数*/
@@ -99,7 +101,6 @@ class http_conn
 	void process();
 
   private:
-	void init();
 	void modfd(int ev);
 	void http_close_conn();
 	HTTP_CODE process_read();
@@ -188,10 +189,11 @@ void http_conn::modfd(int ev)
 bool http_conn::read()
 {
 	printf("进入　read 函数 \n");
-	printf("http_end_index ==%d\n",http_end_index);
+	printf("http_end_index ==%d\n", http_end_index);
 
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
+
 	int readed_bytes = 0;
 	while (true)
 	{

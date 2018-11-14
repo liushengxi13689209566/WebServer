@@ -21,7 +21,7 @@
 #include <sys/epoll.h>
 #include <signal.h>
 #include <memory>
-#include <map>
+#include <unordered_map>
 
 #include "http_conn.h"
 #include "../threadPool.h"
@@ -54,10 +54,12 @@ class WebServer
 
   private:
 	static int listenfd;
-	std::map<int, http_conn> users; /*任务类对象*/
+	std::unordered_map<int, http_conn> users; /*任务类对象*/
+	
   public:
 	static int sum_user_count; /*总用户*/
 };
+
 int WebServer::listenfd = 0;
 int WebServer::sum_user_count = 0;
 
@@ -107,6 +109,7 @@ void WebServer::WebServer_init(int epollfd, int connfd, const sockaddr_in &clien
 		throw __LINE__;
 	addfd(epollfd, connfd, true);
 	WebServer::sum_user_count++;
+	users[connfd].init();
 	users[connfd].http_sockfd = connfd;
 	users[connfd].http_address = client_address;
 }
@@ -195,6 +198,7 @@ int WebServer::start(const char *ip, const int port)
 				printf("写事件\n");
 				if (!users[sockfd].write())
 					WebServer_closefd(epollfd, sockfd);
+				printf("写事件完成\n");
 			}
 			/*其他*/
 			else
