@@ -24,7 +24,7 @@
 #include <unordered_map>
 
 #include "http_conn.h"
-#include "../threadPool.h"
+#include "./threadPool.h"
 #include "./base_function.h"
 
 const int MAX_FD = 65536;
@@ -34,28 +34,26 @@ const int MAX_EVENT_NUMBER = 10000;
 class WebServer
 {
   public:
-	WebServer(const char *ip, const int port)
+	WebServer()
 	{
-		start(ip, port);
 	}
 	~WebServer()
 	{
 		Close(listenfd);
 	}
+	int run(const char *ip, const int port);
 
   private:
 	void Setnonblock(int fd);
 	void addfd(int epollfd, int fd, bool one_shot);
-	void removefd(int epollfd, int fd);
 	void addsig(int sig, void(handler)(int), bool restart = true);
-	int start(const char *ip, const int port);
 	void WebServer_init(int epollfd, int connfd, const sockaddr_in &client_address);
 	void WebServer_closefd(int epollfd, int connfd);
 
   private:
 	static int listenfd;
 	std::unordered_map<int, http_conn> users; /*任务类对象*/
-	
+
   public:
 	static int sum_user_count; /*总用户*/
 };
@@ -79,11 +77,7 @@ void WebServer::addfd(int epollfd, int fd, bool one_shot)
 	Epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
 	Setnonblock(fd);
 }
-void WebServer::removefd(int epollfd, int fd)
-{
-	Epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, 0);
-	Close(fd);
-}
+
 
 void WebServer::addsig(int sig, void(handler)(int), bool restart)
 {
@@ -117,13 +111,13 @@ void WebServer::WebServer_closefd(int epollfd, int connfd)
 {
 	if (users[connfd].http_sockfd != -1)
 	{
-		removefd(epollfd, connfd);
 		users[connfd].http_sockfd = -1;
 		this->sum_user_count--;
+		Epoll_ctl(epollfd, EPOLL_CTL_DEL, connfd, 0);
+		Close(connfd);
 	}
 }
-
-int WebServer::start(const char *ip, const int port)
+int WebServer::run(const char *ip, const int port)
 {
 	/*忽略SIGPIPE信号(SIG_IGN表示忽略SIGPIPE那个注册的信号)*/
 	addsig(SIGPIPE, SIG_IGN);
@@ -145,21 +139,40 @@ int WebServer::start(const char *ip, const int port)
 	Listen(listenfd, 5);
 	epoll_event events[MAX_EVENT_NUMBER];
 	int epollfd = Epoll_create(5);
-	addfd(epollfd, listenfd, false);
+
+	// addfd(epollfd, listenfd, false);
+	{
+		epoll_event event;
+		event.data.fd = listenfd;
+		event.events = EPOLLIN | EPOLLRDHUP;
+		Epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &event);
+		Setnonblock(listenfd);
+	}
+
+
+
+
 	http_conn::http_epollfd = epollfd;
 
 	while (true)
 	{
-		int number = Epoll_wait(epollfd, events, MAX_EVENT_NUMBER, -1);
+		errno = 0;
+		int number = Epoll_wait(epollfd, events, MAX_EVENT_NUMBER, 3);
+		perror("epoll_wait");
 		for (int i = 0; i < number; i++)
 		{
 			int sockfd = events[i].data.fd;
 
 			if (sockfd == listenfd) /*有新的连接到来*/
 			{
+				printf("尝试新的链接\n");
+
 				struct sockaddr_in client_address;
 				socklen_t client_len = sizeof(client_address);
 				int connfd = Accept(listenfd, (struct sockaddr *)&client_address, &client_len);
+
+				printf("connfd == %d , sum_user_count == %d\n",connfd,sum_user_count);
+
 				if (sum_user_count >= MAX_FD)
 				{
 					/*发送一个服务器繁忙的信息过去,待完成*/
@@ -188,7 +201,7 @@ int WebServer::start(const char *ip, const int port)
 				}
 				else
 				{
-					printf("读时间失败\n");
+					printf("读事件失败\n");
 					WebServer_closefd(epollfd, sockfd);
 				}
 			}
@@ -198,7 +211,7 @@ int WebServer::start(const char *ip, const int port)
 				printf("写事件\n");
 				if (!users[sockfd].write())
 					WebServer_closefd(epollfd, sockfd);
-				printf("写事件完成\n");
+				printf("*****************写事件完成\n");
 			}
 			/*其他*/
 			else
@@ -206,7 +219,7 @@ int WebServer::start(const char *ip, const int port)
 			}
 		}
 	}
+	Close(epollfd);
 	return 0;
 }
-
 #endif

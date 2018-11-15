@@ -5,7 +5,7 @@
 	> Created Time: 2018年10月27日 星期六 10时21分56秒
  ************************************************************************/
 
-#include "WebServer.h"
+#include "./WebServer.h"
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
 	const int port = atoi(argv[2]);
 	try
 	{
-		WebServer my(ip, port);
+		WebServer my;
+		my.run(ip,port);
 	}
 	catch (const int &line_number)
 	{
