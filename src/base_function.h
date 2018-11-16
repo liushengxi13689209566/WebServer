@@ -11,24 +11,21 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/select.h>
-#include <strings.h>
+#include <string.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <signal.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <pthread.h>
 #include <netdb.h>
 #include <math.h>
-#include <pthread.h>
 
 /*基本网络编程函数封装*/
 int Socket(int family, int type, int protocol);
