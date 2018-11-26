@@ -86,7 +86,7 @@ class HttpParse
         {
             line = buffer + http_start_line;
             http_start_line = http_checked_index; /*下一行的起始位置*/
-            //printf("get a line :%s \n", line);
+            printf("get a line :%s \n", line);
             switch (http_check_state)
             {
                 /*分析请求行*/

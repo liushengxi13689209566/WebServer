@@ -9,9 +9,8 @@
 #define _HTTP_CONN_H
 
 #include "../base/Http_parse.h"
-#include"../base/Socket.h"
+#include "../base/Socket.h"
 #include "./base_function.h"
-
 
 const char *ok_200_title = "OK";
 const char *error_500_title = "Serverr error";
@@ -151,6 +150,8 @@ class http_conn
 
 	/*目标文件的状态，通过他判断是否需要发送　404　，以及文件大小等等*/
 	struct stat http_file_stat;
+	/*已经发送了多少字节*/
+	ssize_t http_have_sended = 0;
 };
 
 int http_conn::http_epollfd = -1;
@@ -172,6 +173,7 @@ void http_conn::init()
 	memset(http_read_buf, '\0', READ_BUFFERSIZE);
 	memset(http_header_buf, '\0', HEADER_BUFFERSIZE);
 	memset(http_real_file, '\0', FILENAME_LEN);
+	http_have_sended = 0;
 }
 void http_conn::modfd(int ev)
 {
@@ -185,27 +187,8 @@ bool http_conn::read()
 {
 	//printf("进入　read 函数 \n");
 	//printf("http_end_index ==%d\n", http_end_index);
-
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
-
-	// int readed_bytes = 0;
-	// while (true)
-	// {
-	// 	//printf("开始　recv \n");
-
-	// 	readed_bytes = recv(http_sockfd, http_read_buf + http_end_index, READ_BUFFERSIZE - http_end_index, 0);
-	// 	if (readed_bytes == -1)
-	// 	{
-	// 		if (errno == EAGAIN || errno == EWOULDBLOCK)
-	// 			return true; /*无数据可读，返回　true */
-	// 		else
-	// 			return false;
-	// 	}
-	// 	else if (readed_bytes == 0)
-	// 		return false;
-	// 	http_end_index += readed_bytes;
-	// }
 	Sockfd.RecvAll(http_read_buf, READ_BUFFERSIZE, http_end_index, SOCK_NONBLOCK);
 	//printf("出 read 函数　\n");
 	return true;
@@ -216,54 +199,15 @@ bool http_conn::read()
 先发送头部（头部信息已经构建好了［在http_header_buf中］）过去，然后调用 sendfile 将请求所对应的文件发送过去　
 考虑是否保存　连接
 */
-// bool http_conn::send_header()
-// {
-// 	//printf("进入http_conn::send_header 函数\n");
-
-// 	if (Sendlen(http_sockfd, http_header_buf, strlen(http_header_buf), 0) == -1)
-// 		return false;
-// 	else
-// 		return true;
-// }
-/*通过所有检测，只是单纯的发送文件，响应请求*/
+/*响应请求*/
 bool http_conn::write()
 {
 	printf(" 进入http_conn::write函数\n");
 	Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 	printf("出 send_header 函数\n ");
-	
-	/*打开文件*/
-	int http_real_file_fd = open(http_real_file, O_RDONLY);
-	int ret = 0;
-	// 双"//"都表示测试语句
-	//sendfile(http_sockfd, http_real_file_fd, NULL, http_file_stat.st_size);
-	ssize_t bytes_have_send = 0;
 
-	while (bytes_have_send != http_file_stat.st_size)
-	{
-		printf("死循环\n");
-		if (bytes_have_send > http_file_stat.st_size)
-			break;
-		ret = sendfile(http_sockfd, http_real_file_fd,
-					   &bytes_have_send, http_file_stat.st_size - bytes_have_send);
-		if (ret == -1)
-		{
-			if (errno == EAGAIN)
-				continue;
-			else
-			{
-				Close(http_real_file_fd);
-				return false;
-			}
-		}
-		else
-		{
-			bytes_have_send += ret;
-		}
-	}
-	Close(http_real_file_fd);
-	printf("出 sendfile响应 函数 结束　\n ");
-
+	File file(http_real_file, O_RDONLY);
+	Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
 	if (http_keep_connect)
 	{
 		init();

@@ -61,15 +61,15 @@ class BaseSocket
     /*暂时写成循环
 	ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
 	*/
-    inline bool Sendfile(int in_fd, off_t *offset, size_t count, ssize_t file_size)
+    inline bool Sendfile(int in_fd, off_t *offset, size_t count, ssize_t &http_have_sended)
     {
         ssize_t bytes_have_send = 0;
         ssize_t ret = 0;
-        while (bytes_have_send != file_size)
+        while (bytes_have_send != count)
         {
-            if (bytes_have_send > file_size)
+            if (bytes_have_send > count)
                 break;
-            ret = sendfile(base_socket_, in_fd, &bytes_have_send, file_size - bytes_have_send);
+            ret = sendfile(base_socket_, in_fd, offset, count - bytes_have_send);
             if (ret == -1)
             {
                 if (errno == EAGAIN)
@@ -82,6 +82,7 @@ class BaseSocket
             else
             {
                 bytes_have_send += ret;
+                http_have_sended += ret;
             }
         }
         return true;
