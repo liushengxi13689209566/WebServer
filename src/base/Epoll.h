@@ -36,7 +36,7 @@ class Epoll
             throw CallFailed("Epoll.hpp 文件：epoll_ctl function failed !!! at line  ", __LINE__);
         return (ret);
     }
-    inline int RemoveFd(int fd)
+    inline int RemoveFd(int &fd)
     {
         int ret = epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, 0);
         if (ret < 0)
