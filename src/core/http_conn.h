@@ -232,10 +232,10 @@ bool http_conn::send_header()
 /*通过所有检测，只是单纯的发送文件，响应请求*/
 bool http_conn::write()
 {
-	//printf(" 进入http_conn::write函数\n");
+	printf(" 进入http_conn::write函数\n");
 
 	send_header();
-	//printf("出 send_header 函数\n ");
+	printf("出 send_header 函数\n ");
 	/*打开文件*/
 	int http_real_file_fd = open(http_real_file, O_RDONLY);
 	int ret = 0;
@@ -245,13 +245,15 @@ bool http_conn::write()
 
 	while (bytes_have_send != http_file_stat.st_size)
 	{
-		ret = sendfile(http_sockfd, http_real_file_fd, 
-		&bytes_have_send, http_file_stat.st_size - bytes_have_send);
+		printf("死循环\n");
+		ret = sendfile(http_sockfd, http_real_file_fd,
+					   &bytes_have_send, http_file_stat.st_size - bytes_have_send);
 		if (ret == -1)
 		{
 			if (errno == EAGAIN)
 				continue;
-			else {
+			else
+			{
 				Close(http_real_file_fd);
 				return false;
 			}
@@ -262,7 +264,7 @@ bool http_conn::write()
 		}
 	}
 	Close(http_real_file_fd);
-	//printf("出 sendfile响应 函数 结束　\n ");
+	printf("出 sendfile响应 函数 结束　\n ");
 
 	if (http_keep_connect)
 	{
@@ -495,7 +497,7 @@ http_conn::HTTP_CODE http_conn::process_read()
 }
 void http_conn::http_close_conn()
 {
-	if ( http_sockfd != -1 )
+	if (http_sockfd != -1)
 	{
 		Epoll_ctl(http_epollfd, EPOLL_CTL_DEL, http_sockfd, 0);
 		Close(http_sockfd);
