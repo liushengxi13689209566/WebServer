@@ -1,352 +1,565 @@
-<!doctype html>
 <html>
 
 <head>
-    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no' />
-    <meta charset='utf-8'>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <style></style>
-    <title>car_cc</title>
-    <script src="http://res.itqiche.com/engine/itqiche.min.js"></script>
-    <script src="//cdn.bootcss.com/jquery/1.12.3/jquery.min.js" type="text/javascript"></script>
-    <script src="dealers.js" type="text/javascript"></script>
-    <script>
-        ASSET_PREFIX = "";
-        SCRIPT_PREFIX = "";
-        SCENE_PATH = "548986.json";
-        CONTEXT_OPTIONS = {
-            'antialias': true,
-            'alpha': false,
-            'preserveDrawingBuffer': false,
-            'preferWebGl2': true
-        };
-        SCRIPTS = [9020975, 9020977, 9020978, 9020980, 9020981, 9020982, 9020983, 9020984, 9020985, 9020986, 9020988, 9024632, 9036786, 9037800, 9053851, 9061860, 9128936, 9138946, 9138991, 9140860, 9149227, 9152094, 9176130, 9020987];
-        CONFIG_FILENAME = "config.json";
-        pc.script.legacy = false;
-    </script>
-    <style>
-        input,select{
-            color:inherit;
-            outline:none;
-            font-family:"Microsoft YaHei";
-        }
-        .input{
-            width: 83%;height: 1.5em;border:medium none;border-radius:0.2em;background-color:rgba(51, 51, 51, 0.5);padding:0.2em 0.5em;font-size:1em;text-align:center;
-        }
-        .select{
-            width: 43.5%;height: 1.9em;border:medium none;border-radius:0.2em;background-color:rgba(51, 51, 51, 0.5);padding:0.2em 0.2em;font-size:1em;text-align:center;
-        }
-        .selectD{
-            width: 88%;height: 1.9em;border:medium none;border-radius:0.2em;background-color:rgba(51, 51, 51, 0.5);padding:0.2em 0.2em;font-size:1em;text-align:center;margin-top:0.3em;
-        }
-    </style>
+    <title> Tattoo_Welkin </title>
+
 </head>
 
 <body>
-    <script src="http://res.itqiche.com/engine/__start__.js"></script>
-    <script src="__loading__.js"></script>
-    <div id="MYTRY" style="font-family: 'Microsoft YaHei', sans-serif; font-weight: normal; font-style: normal; font-size: 21.3333px; white-space: normal; line-height: 150%; text-align: center; color: rgb(255, 255, 255); padding: 0px; margin: 0px; border: none; display: none; max-width: none; max-height: none; box-sizing: content-box; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-decoration: none; width: 100%; height: 100%; position: fixed; left: 0px; top: 0px; z-index: 100001; opacity: 1;">
-        <div style="font-family:'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',sans-serif;font-weight:normal;font-style:normal;font-size:1em;white-space:normal;line-height:150%;;text-align:center;color:#fff;padding:0;margin:0;border:none;display:block;max-width:none;max-height:none;box-sizing:content-box;-webkit-tap-highlight-color:rgba(0,0,0,0);text-decoration:none;position:absolute;width:100%;height:100%;background:#000;opacity:.3;z-index:0;filter:alpha(opacity=70)"></div>
-        <div style="font-family: 'helvetica neue', tahoma, 'hiragino sans gb', stheiti, 'wenquanyi micro hei', sans-serif; font-weight: normal; font-style: normal; font-size: 1em; white-space: normal; line-height: 150%; text-align: center; color: rgb(255, 255, 255); padding: 0px; margin: -174.5px 0px 0px; border: none; display: block; max-width: none; max-height: none; box-sizing: content-box; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-decoration: none; position: absolute; left: 0px; top: 50%; width: 100%; visibility: visible; z-index: 100002; border-radius: 0.5em;">
-            <div>
-                <div style="font-family:'Microsoft YaHei',sans-serif;font-weight:normal;font-style:normal;font-size:1em;white-space:normal;line-height:150%;text-align:center;color:#fff;padding:0;margin:0 auto;border:none;display:block;max-width:18em;max-height:none;box-sizing:content-box;-webkit-tap-highlight-color:rgba(0,0,0,0);text-decoration:none;width:85%;height:15em;position:relative;background-color:rgba(171, 166, 166, 0.7);border-radius:0 0 4px 4px;">
-                    <div>
-                        <h5 style="margin:0 0 0.7em 0;background-color: #D4D4D4;color: #2D2D2D;display: block;font-size: 1em;font-weight: bold;line-height: 1.5em;overflow: hidden;padding: 0.4em 1em;text-transform: uppercase;">预约试驾</h5>
-                        <span id="TRY_CLOSE" style="font-family:'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',sans-serif;font-weight:normal;font-style:normal;font-size:1em;white-space:normal;line-height:150%;;text-align:center;color:#fff;padding:0.1em;margin:0;border:none;display:block;max-width:none;max-height:none;box-sizing:content-box;-webkit-tap-highlight-color:rgba(0,0,0,0);text-decoration:none;position:absolute;font-size:0.7em;line-height:1.4em;font-weight:normal;cursor:pointer;opacity:1;border-radius:50%;text-align:center;right:1.3em;margin-right:-0.775em;width:1.55em;height:1.55em;top:0.8em;float: left;">
-                            <img src="xxx.png" style="font-family:'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',sans-serif;font-weight:normal;font-style:normal;font-size:1em;white-space:normal;line-height:150%;;text-align:center;color:#fff;padding:0;margin:0;border:none;display:block;max-width:none;max-height:none;box-sizing:content-box;-webkit-tap-highlight-color:rgba(0,0,0,0);text-decoration:none;width:100%;height:100%">
-                        </span>
-                    </div>
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
 
-                    <div style="margin-bottom:0.5em;">
-                        <input type="text" class="input" placeholder="姓名" maxlength="10" id="NAME">
-                    </div>
-                    <div style="margin-bottom:0.5em;">
-                        <input type="text" class="input" placeholder="手机号" maxlength="11" id="MOBILE">
-                    </div>
-                    <div>
-                        <select class="select" id="PROVINCES">
-                            <option value='-1'>选择省份</option>
-                        </select>
-                        <select class="select" id="CITY">
-                            <option value="-1">选择城市</option>
-                        </select>
-                        <select class="selectD" id="DEAL">
-                            <option value="-1">选择4S店</option>
-                        </select>
-                    </div>
-                    <div id="TRY" style="display: block;border-radius:0.2em;width:8em;height: 2em;background:#4F4F4F;line-height:2em;cursor:pointer;margin:0.5em auto 0;font-family: 'Microsoft YaHei';">提交</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        var caServer = {
-            dataurl: 'http://e.changan.com.cn/changan_dealers/api.php?appkey=212C9F1F9C02A967352C0935DD9CDA20',
-            suburl: 'http://www.changan.com.cn/api.php?op=try&aid=386'
-        }
-        var availableDealersOnly = [], availableCity = [];
-        var locationData = {
-            cars: [
-                {
-                    carid: 'C301',
-                    name: '睿骋CC'
-                },
-            ],
-            provinces: [],
-            citys: [],
-            chooses: []
-        },
-            subData = {};
-        function getRequest(data, callback)
-        {
-            var urlparams = '',
-                params = [];
-            for (var k in data)
-            {
-                params.push(k + '=' + data[k]);
-            }
-            //加入时间戳
-            params.push('_=' + Date.parse(new Date()));
-            var url = (params.length > 0) ? caServer.dataurl + '&' + params.join('&') : caServer.dataurl;
-            $.ajax({
-                type: "get",
-                url: url,
-                async: true,
-                dataType: 'jsonp',
-                jsonp: "callback", //传递给请求处理程序或页面的，用以获得jsonp回调函数名的参数名(一般默认为:callback)
-                success: function (result)
-                {
-                    if (typeof callback == 'function')
-                    {
-                        callback(result);
-                    }
-                },
-                error: function (e)
-                {
-                    console.log('get data Error, E:', e);
-                }
-            });
-        }
-        //
-        function getProvincesId(name)
-        {
-            for (var k in locationData.provinces)
-            {
-                if (locationData.provinces[k].regionName == name)
-                {
-                    subData.region_id_1 = locationData.provinces[k].regionCode;
-                    return subData.region_id_1;
-                }
-            }
-            return 0;
-        }
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
 
-        function getProvinces()
-        {
-            function setProvinces(plist)
-            {
-                locationData.provinces = plist;
-                $("#PROVINCES option").not(":eq(0)").remove();
-                var html = "";
-                $.each(plist, function (i, v)
-                {
-                    html += '<option value="' + v.regionCode + '">' + v.regionName + '</option>';
-                });
-                $("#PROVINCES").append(html);
-            }
-            getRequest({
-                m: 'province',
-                stype: 'jc_',
-                groupCode: 'S401'
-            }, setProvinces);
-        }
-        //
-        function getCitysId(name)
-        {
-            for (var k in locationData.citys)
-            {
-                if (locationData.citys[k].regionName == name)
-                {
-                    subData.region_id_2 = locationData.citys[k].regionCode;
-                    return subData.region_id_2;
-                }
-            }
-            return 0;
-        }
+In addition to the topics noted above, appropriate postings include:
 
-        function getCitys(provinceId)
-        {
-            function setCitys(clist)
-            {
-                locationData.citys = clist;
-                $("#CITY option").not(":eq(0)").remove();
-                var html = "";
-                $.each(clist, function (i, v)
-                {
-                    if ($.inArray(v.regionName, availableCity) > -1)
-                    {
-                        html += '<option value="' + v.regionCode + '">' + v.regionName + '</option>';
-                    }
-                });
-                $("#CITY").append(html);
-            }
-            getRequest({
-                m: 'city',
-                pcode: provinceId,
-                stype: 'jc_',
-                groupCode: 'S401'
-            }, setCitys);
-        }
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
 
-        function getDealers(cid)
-        {
-            function setDealers(dlist)
-            {
-                $("#DEAL option").not(":eq(0)").remove();
-                var html = "";
-                //苏州市全反
-                if ($("#CITY").val() == "320500")
-                {
-                    dlist.reverse();
-                }
-                $.each(dlist, function (i, v)
-                {
-                    //过滤
-                    if ($.inArray(v.dealerName, availableDealersOnly) > -1)
-                    {
-                        html += '<option dealerid="' + v.dealerId + '" value="' + v.dealerCode + '">' + v.dealerName + '</option>';
-                    }
-                });
-                $("#DEAL").append(html);
-            }
-            getRequest({
-                m: 'dealers',
-                cityid: cid,
-                stype: 'jc_',
-                groupCode: 'S401'
-            }, setDealers);
-        }
-        //获取省份
-        getProvinces();
+You can subscribe or unsubscribe to the IETF discussion list here.
 
-        function getCarsId(name)
-        {
-            for (var k in locationData.cars)
-            {
-                if (locationData.cars[k].name == name)
-                {
-                    subData.carcode = locationData.cars[k].carid;
-                    return subData.carcode;
-                }
-            }
-            return 0;
-        }
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
 
-        $("#PROVINCES").change(function ()
-        {
-            var cs = $("#PROVINCES").val();
-            if (cs == -1)
-            {
-                $("#CITY option").not(":eq(0)").remove();
-                $("#DEAL option").not(":eq(0)").remove();
-                return;
-            }
-            getCitys(cs);
-        });
-        $("#CITY").change(function ()
-        {
-            var cs = $("#CITY").val();
-            if (cs == -1)
-            {
-                $("#DEAL option").not(":eq(0)").remove();
-                return;
-            }
-            getDealers(cs);
-        });
-        $("#TRY").click(function ()
-        {
-            var name = $("#NAME").val();
-            if (name == '')
-            {
-                alert('请填写姓名');
-                return;
-            }
-            var mobile = $("#MOBILE").val();
-            if (mobile == "")
-            {
-                alert("请填写手机号");
-                return;
-            }
-            var length = mobile.length;
-            if (length != 11 || !(/^(((1[3-9][0-9][0-9])|([0-9][0-9][0-9]))+\d{8})$/.test(mobile)))
-            {
-                alert("手机号码有误，请重填");
-                return;
-            }
-            var cs = $("#PROVINCES").val();
-            if (cs == -1)
-            {
-                alert("请选择省份");
-                return;
-            }
-            var city = $("#CITY").val();
-            if (city == -1)
-            {
-                alert("请选择城市");
-                return;
-            }
-            var deal = $("#DEAL").val();
-            if (deal == -1)
-            {
-                alert("请选择4S店");
-                return;
-            }
-            $.ajax({
-                type: "GET",
-                url: "api.php",
-                dataType: 'json',
-                data: {
-                    "aid": 386,
-                    "name": name,
-                    "mobile": mobile,
-                    "car_series": "C301",
-                    "car_series_name": "睿骋CC",
-                    "region_id_1": cs,
-                    "region_id_1_name": ($("#PROVINCES").find("option:selected").text()),
-                    "region_id_2": city,
-                    "region_id_2_name": ($("#CITY").find("option:selected").text()),
-                    "dealer_code": deal,
-                    "dealer_id": ($("#DEAL").find("option:selected").attr("dealerid")),
-                    "dealer_code_name": ($("#DEAL").find("option:selected").text())
-                },
-                success: function (jsondata)
-                {
-                    if (jsondata.status == 0)
-                    {
-                        alert('提交成功');
-                        $("#MYTRY").hide();
-                    } else if (jsondata.msg)
-                    {
-                        alert(jsondata.msg);
-                    }
-                }
-            });
-        });
-        $("#TRY_CLOSE").click(function ()
-        {
-            $("#MYTRY").hide();
-        });
-        $(function ()
-        {
-            for (var j = 0; j < availableDealers.length; j++)
-            {
-                var dealerItem = availableDealers[j];
-                availableDealersOnly.push(dealerItem.dealer);
-                availableCity.push(dealerItem.city);
-            }
-        });
-    </script>
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+specification of Internet technology through discussion of technical issues, and it hosts discussions of IETF
+direction, policy, and procedures. As this is the most general IETF mailing list, considerable latitude is allowed with
+respect to topics discussed. Advertising, whether to solicit business or to promote employment opportunities, falls
+well outside the range of acceptable topics, as do discussions of a personal nature.
+
+The IETF discussion list is meant for initial discussion only. Discussions that fall within the area of any working
+group list (or other well established list) should be moved to that more specific list as soon as this is pointed out,
+unless the issue is one for which the working group needs wider input or direction.
+
+In addition to the topics noted above, appropriate postings include:
+
+Last Call discussions of proposed protocol actions
+Discussion of technical issues that are candidates for IETF work, but do not yet have an appropriate e-mail venue
+Discussion of IETF administrative policies
+Questions and clarifications concerning IETF meetings
+Email archives for the IETF discussion list are accessible via the Web.
+
+You can subscribe or unsubscribe to the IETF discussion list here.
+
+Working Group Discussion Lists
+Each IETF working group maintains a general discussion mailing list where most of its work is conducted. Mail on the
+working group mailing lists is expected to be technically relevant to the working groups supported by those lists.
+
+Information on how to subscribe to an IETF working group mailing list, as well as the location of the mailing list
+archives, can be found on the Web page for that working group. Access to the Web pages for all active IETF working
+groups is available on the Active IETF Working Groups web page.
+
+The archives for many working groups are housed at the IETF Secretariat. In those cases where the archives are housed
+elsewhere, the Secretariat attempts to maintain duplicate sets of text archives, with the messages for each working
+group stored in a separate subdirectory. The IETF Secretariat text archives are located at
+ftp://ftp.ietf.org/ietf-mail-archive/.
+
+Several IETF Working Groups maintain http-based mailing list archives both at ietf.org and at other sites. Please visit
+Web-based Working Group E-mail Archives for a list of these.
+
+Architecture Discussion List
+The architecture-discuss list serves as a technical discussion forum for all members of the IETF community that are
+interested in larger architectural issues. It is meant to be an open discussion forum for all long and/or wide range
+architectural concerns related to the Internet Architecture. In particular, it may be used to discuss and bring forth
+different points of view on controversial architectural questions. Discussions that drill down and dwell on specifics
+of individual protocols or technologies are to be discouraged, redirected to appropriate other fora, or re-cast to
+discussions of broader implications for Internet architecture.
+
+architecture-discuss mail archives
+architecture-discuss subscription and list information
+Meeting Discussion Lists
+Each IETF meeting has an attendee discussion list where attendees can connect with each other regarding issues related
+to the meeting.
+
+Information on how to subscribe to the meeting attendee mailing list for the current meeting can be found on the
+Meeting Email Lists page. Attendees are also given the opportunity to subscribe to this mailing list when they register
+for the meeting.
+
+Please note that messages to the Secretariat regarding meeting issues that require the involvement of the Secretariat
+or IAD - IETF Administrative Director should be sent to mtd@ietf.org for quick resolution.
+
+Inappropriate Postings to Discussion Lists
+Inappropriate postings to discussion lists include:
+
+Unsolicited bulk e-mail
+Discussion of subjects unrelated to IETF policy, meetings, activities, or technical concerns
+Unprofessional commentary, regardless of the general subject
+The IETF Chair, the IETF Executive Director, or a sergeant-at-arms appointed by the Chair is empowered to restrict
+posting by a person or of a thread as they deem appropriate to limit abuse. Complaints regarding their decisions should
+be referred to the IAB. For more details, please see RFC 3005, "IETF Discussion List Charter."
+
+NOTE: The IETF discussion list is performing spam control according to the guidelines given in the IESG guidelines on
+spam control. If you have problems posting to the list, then please send a message to the IETF Technical Support Team.
+
+    <hr>
+    <br>
+    <hr>
+
+    <p>-------By Tattoo </p>
+
 </body>
+
+<body>
 
 </html>

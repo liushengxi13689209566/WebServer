@@ -60,6 +60,7 @@ class BaseSocket
     }
     /*暂时写成循环
 	ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
+    http_have_sended 必须是引用　
 	*/
     inline bool Sendfile(int in_fd, off_t *offset, size_t count, ssize_t &http_have_sended)
     {
