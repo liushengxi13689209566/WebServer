@@ -206,40 +206,8 @@ bool http_conn::write()
 	Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 	printf("出 send_header 函数\n ");
 
-	// File file(http_real_file, O_RDONLY);
-	// Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
-
-	/*打开文件*/
-	int http_real_file_fd = open(http_real_file, O_RDONLY);
-	int ret = 0;
-	// 双"//"都表示测试语句
-	//sendfile(http_sockfd, http_real_file_fd, NULL, http_file_stat.st_size);
-	ssize_t bytes_have_send = 0;
-
-	while (bytes_have_send != http_file_stat.st_size)
-	{
-		printf("死循环\n");
-		if (bytes_have_send > http_file_stat.st_size)
-			break;
-		ret = sendfile(http_sockfd, http_real_file_fd,
-					   &bytes_have_send, http_file_stat.st_size - bytes_have_send);
-		if (ret == -1)
-		{
-			if (errno == EAGAIN)
-				continue;
-			else
-			{
-				Close(http_real_file_fd);
-				return false;
-			}
-		}
-		else
-		{
-			bytes_have_send += ret;
-		}
-	}
-	Close(http_real_file_fd);
-	printf("出 sendfile响应 函数 结束　\n ");
+	File file(http_real_file, O_RDONLY);
+	Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
 
 	if (http_keep_connect)
 	{
