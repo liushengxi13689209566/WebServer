@@ -8,25 +8,11 @@
 #ifndef _HTTP_CONN_H
 #define _HTTP_CONN_H
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <cassert>
-#include <sys/epoll.h>
-#include <sys/uio.h>
-#include <sys/stat.h>
-#include <sys/sendfile.h>
-
+#include "../base/Http_parse.h"
+#include"../base/Socket.h"
 #include "./base_function.h"
-#include "./WebServer.h"
 
-const char *doc_root = "./index.html";
+
 const char *ok_200_title = "OK";
 const char *error_500_title = "Serverr error";
 const char *error_500_path = "./500.html";
@@ -125,6 +111,10 @@ class http_conn
 	static int http_epollfd;
 
   private:
+	/*http 解析类*/
+	HttpParse http_data_pack;
+	BaseSocket Sockfd;
+
 	/*读缓冲区*/
 	char http_read_buf[READ_BUFFERSIZE] = {0};
 	/*读缓冲区中已经读入的最后一个字节的位置*/

@@ -37,7 +37,7 @@ class other_error : public std::logic_error
 {
     /*等待填充*/
 };
-
-// const char *doc_root = "../../wwwroot/Html/index.html";
+const char *doc_root = "./index.html";
+//const char *doc_root = "../../wwwroot/Html/index.html";
 // const char *ok_200_title = "OK";
 #endif

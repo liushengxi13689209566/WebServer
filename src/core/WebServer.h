@@ -123,10 +123,6 @@ int WebServer::run()
 
 	http_conn::http_epollfd = serv_epollfd.GetEpollFd();
 	int epollfd = serv_epollfd.GetEpollFd();
-	// epoll_event events[MAX_EVENT_NUMBER];
-	// int epollfd = Epoll_create(5);
-
-	// AddFd(epollfd, listenfd, false);
 
 	struct epoll_event event;
 	event.data.fd = listenfd;
@@ -139,6 +135,7 @@ int WebServer::run()
 		errno = 0;
 		int number = serv_epollfd.Wait();
 		perror("epoll_wait");
+
 		for (int i = 0; i < number; i++)
 		{
 			int sockfd = serv_epollfd.GetFdByIndex(i);
@@ -149,11 +146,7 @@ int WebServer::run()
 
 				struct sockaddr_in client_address;
 				socklen_t client_len = sizeof(client_address);
-				//int connfd = Accept(listenfd, (struct sockaddr *)&client_address, &client_len);
 				int connfd = serv_socket.Accept(reinterpret_cast<struct sockaddr *>(&client_address), &client_len);
-
-				//printf("connfd == %d , sum_user_count == %d\n", connfd, sum_user_count);
-
 				if (sum_user_count >= MAX_FD)
 				{
 					/*发送一个服务器繁忙的信息过去,待完成*/
@@ -175,7 +168,6 @@ int WebServer::run()
 				if (users[sockfd].read())
 				{
 					printf("读事件　完成！！！\n");
-					//if (!pool.append(&users[sockfd]))
 					if (!pool.append(std::bind(&http_conn::process, &users[sockfd])))
 					{
 						printf("append 失败！！！！\n");
