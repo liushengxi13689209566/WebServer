@@ -8,27 +8,16 @@
 #ifndef _WEBSERVER_H
 #define _WEBSERVER_H
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <cassert>
-#include <sys/epoll.h>
-#include <signal.h>
+
 #include <memory>
 #include <unordered_map>
 
-#include "http_conn.h"
-#include "./threadPool.h"
-#include "./base_function.h"
+#include"http_conn.h"
+
+#include "../base/Epoll.h"
+#include "../base/Thread_pool.h"
 
 const int MAX_FD = 65536;
-const int MAX_EVENT_NUMBER = 10000;
 
 /*服务器类*/
 class WebServer
@@ -44,14 +33,15 @@ class WebServer
 	int run(const char *ip, const int port);
 
   private:
-	void Setnonblock(int fd);
-	void addfd(int epollfd, int fd, bool one_shot);
-	void addsig(int sig, void(handler)(int), bool restart = true);
-	void WebServer_init(int epollfd, int connfd, const sockaddr_in &client_address);
+	void SetNonBlock(int fd);
+	void AddFd(int fd, bool one_shot);
+	void AddSig(int sig, void(handler)(int), bool restart = true);
+	void WebServerInit(int connfd, const sockaddr_in &client_address);
 	void WebServer_closefd(int epollfd, int connfd);
 
   private:
 	static int listenfd;
+	Epoll serv_epollfd;
 	std::unordered_map<int, http_conn> users; /*任务类对象*/
 
   public:
@@ -61,25 +51,25 @@ class WebServer
 int WebServer::listenfd = 0;
 int WebServer::sum_user_count = 0;
 
-void WebServer::Setnonblock(int fd)
+void WebServer::SetNonBlock(int fd)
 {
 	int old_option = fcntl(fd, F_GETFL);
 	int new_option = old_option | O_NONBLOCK;
 	fcntl(fd, F_SETFL, new_option);
 }
-void WebServer::addfd(int epollfd, int fd, bool one_shot)
+void WebServer::AddFd(int fd, bool one_shot)
 {
-	epoll_event event;
+	struct epoll_event event;
 	event.data.fd = fd;
 	event.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
 	if (one_shot)
 		event.events |= EPOLLONESHOT;
-	Epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
-	Setnonblock(fd);
+	serv_epollfd.Add(event, fd);
+	SetNonBlock(fd);
 }
 
 
-void WebServer::addsig(int sig, void(handler)(int), bool restart)
+void WebServer::AddSig(int sig, void(handler)(int), bool restart)
 {
 	struct sigaction sa;
 	memset(&sa, '\0', sizeof(sa));
@@ -94,14 +84,14 @@ void WebServer::addsig(int sig, void(handler)(int), bool restart)
 	if (sigaction(sig, &sa, NULL) == -1)
 		throw __LINE__;
 }
-void WebServer::WebServer_init(int epollfd, int connfd, const sockaddr_in &client_address)
+void WebServer::WebServerInit(int connfd, const sockaddr_in &client_address)
 {
 	int error = 0;
 	socklen_t len = sizeof(error);
 	/*处理错误*/
 	if (getsockopt(connfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
 		throw __LINE__;
-	addfd(epollfd, connfd, true);
+	AddFd(connfd, true);
 	WebServer::sum_user_count++;
 	users[connfd].init();
 	users[connfd].http_sockfd = connfd;
@@ -120,9 +110,10 @@ void WebServer::WebServer_closefd(int epollfd, int connfd)
 int WebServer::run(const char *ip, const int port)
 {
 	/*忽略SIGPIPE信号(SIG_IGN表示忽略SIGPIPE那个注册的信号)*/
-	addsig(SIGPIPE, SIG_IGN);
+	AddSig(SIGPIPE, SIG_IGN);
 
-	threadPool<http_conn> pool(8);
+	ThreadPool pool(4);
+
 	sum_user_count = 0;
 	struct sockaddr_in address;
 	bzero(&address, sizeof(address));
@@ -137,31 +128,31 @@ int WebServer::run(const char *ip, const int port)
 
 	Bind(listenfd, (struct sockaddr *)&address, sizeof(address));
 	Listen(listenfd, 5);
-	epoll_event events[MAX_EVENT_NUMBER];
-	int epollfd = Epoll_create(5);
 
-	// addfd(epollfd, listenfd, false);
+	http_conn::http_epollfd = serv_epollfd.GetEpollFd();
+	int epollfd = serv_epollfd.GetEpollFd();
+	// epoll_event events[MAX_EVENT_NUMBER];
+	// int epollfd = Epoll_create(5);
+
+	// AddFd(epollfd, listenfd, false);
 	{
-		epoll_event event;
+		struct epoll_event event;
 		event.data.fd = listenfd;
 		event.events = EPOLLIN | EPOLLRDHUP;
-		Epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &event);
-		Setnonblock(listenfd);
+		serv_epollfd.Add(event, listenfd);
+		//Epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &event);
+		SetNonBlock(listenfd);
 	}
-
-
-
-
-	http_conn::http_epollfd = epollfd;
+	//http_conn::http_epollfd = epollfd;
 
 	while (true)
 	{
 		errno = 0;
-		int number = Epoll_wait(epollfd, events, MAX_EVENT_NUMBER, 3);
+		int number = serv_epollfd.Wait();
 		perror("epoll_wait");
 		for (int i = 0; i < number; i++)
 		{
-			int sockfd = events[i].data.fd;
+			int sockfd = serv_epollfd.GetFdByIndex(i);
 
 			if (sockfd == listenfd) /*有新的连接到来*/
 			{
@@ -179,22 +170,23 @@ int WebServer::run(const char *ip, const int port)
 					continue;
 				}
 				/*如果不存在会直接插入 map<connfd,http_conn> 进去*/
-				WebServer_init(epollfd, connfd, client_address);
+				WebServerInit(connfd, client_address);
 			}
 			/*出错*/
-			else if (events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
+			else if (serv_epollfd.GetEventsByIndex(i) & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
 			{
 				/*如果有异常，直接关闭客户连接*/
 				WebServer_closefd(epollfd, sockfd);
 			}
 			/*读事件*/
-			else if (events[i].events & EPOLLIN)
+			else if (serv_epollfd.GetEventsByIndex(i) & EPOLLIN)
 			{
 				printf("读事件\n");
 				if (users[sockfd].read())
 				{
 					printf("读事件　完成！！！\n");
-					if (!pool.append(&users[sockfd]))
+					//if (!pool.append(&users[sockfd]))
+					if (!pool.append(std::bind(&http_conn::process, &users[sockfd])))
 					{
 						printf("append 失败！！！！\n");
 					}
@@ -206,7 +198,7 @@ int WebServer::run(const char *ip, const int port)
 				}
 			}
 			/*写事件*/
-			else if (events[i].events & EPOLLOUT)
+			else if (serv_epollfd.GetEventsByIndex(i) & EPOLLOUT)
 			{
 				printf("写事件\n");
 				if (!users[sockfd].write())

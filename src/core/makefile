@@ -1,4 +1,4 @@
-CC = g++ 
+CC = clang++ 
 DEBUG = -g
 OPT = -O2 #优化
 LIBRARY= -lpthread
