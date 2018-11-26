@@ -70,11 +70,15 @@ class http_conn
 	};
 
   public:
-	http_conn()
+	http_conn() : Sockfd(false)
 	{
 		init();
 	}
-	~http_conn() {}
+	http_conn(const http_conn &conn) = delete;
+	http_conn &operator=(const http_conn &) = delete;
+	~http_conn()
+	{
+	}
 
   public:
 	void init();
@@ -153,6 +157,7 @@ int http_conn::http_epollfd = -1;
 
 void http_conn::init()
 {
+	Sockfd.SetFd(http_sockfd);
 	http_check_state = CHECK_STATE_REQUESTLINE;
 	http_keep_connect = false;
 	http_method = GET;
@@ -184,23 +189,24 @@ bool http_conn::read()
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
 
-	int readed_bytes = 0;
-	while (true)
-	{
-		//printf("开始　recv \n");
+	// int readed_bytes = 0;
+	// while (true)
+	// {
+	// 	//printf("开始　recv \n");
 
-		readed_bytes = recv(http_sockfd, http_read_buf + http_end_index, READ_BUFFERSIZE - http_end_index, 0);
-		if (readed_bytes == -1)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				return true; /*无数据可读，返回　true */
-			else
-				return false;
-		}
-		else if (readed_bytes == 0)
-			return false;
-		http_end_index += readed_bytes;
-	}
+	// 	readed_bytes = recv(http_sockfd, http_read_buf + http_end_index, READ_BUFFERSIZE - http_end_index, 0);
+	// 	if (readed_bytes == -1)
+	// 	{
+	// 		if (errno == EAGAIN || errno == EWOULDBLOCK)
+	// 			return true; /*无数据可读，返回　true */
+	// 		else
+	// 			return false;
+	// 	}
+	// 	else if (readed_bytes == 0)
+	// 		return false;
+	// 	http_end_index += readed_bytes;
+	// }
+	Sockfd.RecvAll(http_read_buf, READ_BUFFERSIZE, http_end_index, SOCK_NONBLOCK);
 	//printf("出 read 函数　\n");
 	return true;
 }
@@ -210,22 +216,22 @@ bool http_conn::read()
 先发送头部（头部信息已经构建好了［在http_header_buf中］）过去，然后调用 sendfile 将请求所对应的文件发送过去　
 考虑是否保存　连接
 */
-bool http_conn::send_header()
-{
-	//printf("进入http_conn::send_header 函数\n");
+// bool http_conn::send_header()
+// {
+// 	//printf("进入http_conn::send_header 函数\n");
 
-	if (Sendlen(http_sockfd, http_header_buf, strlen(http_header_buf), 0) == -1)
-		return false;
-	else
-		return true;
-}
+// 	if (Sendlen(http_sockfd, http_header_buf, strlen(http_header_buf), 0) == -1)
+// 		return false;
+// 	else
+// 		return true;
+// }
 /*通过所有检测，只是单纯的发送文件，响应请求*/
 bool http_conn::write()
 {
 	printf(" 进入http_conn::write函数\n");
-
-	send_header();
+	Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 	printf("出 send_header 函数\n ");
+	
 	/*打开文件*/
 	int http_real_file_fd = open(http_real_file, O_RDONLY);
 	int ret = 0;

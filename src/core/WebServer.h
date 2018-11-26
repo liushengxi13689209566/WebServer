@@ -91,8 +91,8 @@ void WebServer::WebServerInit(int connfd, const sockaddr_in &client_address)
 		throw __LINE__;
 	AddFd(connfd, true);
 	WebServer::sum_user_count++;
-	users[connfd].init();
 	users[connfd].http_sockfd = connfd;
+	users[connfd].init();
 	users[connfd].http_address = client_address;
 }
 void WebServer::WebServer_closefd(int epollfd, int connfd)
