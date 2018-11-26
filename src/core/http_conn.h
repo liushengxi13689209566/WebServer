@@ -246,6 +246,8 @@ bool http_conn::write()
 	while (bytes_have_send != http_file_stat.st_size)
 	{
 		printf("死循环\n");
+		if (bytes_have_send > http_file_stat.st_size)
+			break;
 		ret = sendfile(http_sockfd, http_real_file_fd,
 					   &bytes_have_send, http_file_stat.st_size - bytes_have_send);
 		if (ret == -1)
