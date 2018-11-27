@@ -105,8 +105,8 @@ bool http_conn::read()
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
 	Sockfd.RecvAll(http_read_buf, READ_BUFFERSIZE, http_end_index, SOCK_NONBLOCK);
-	printf("%s",http_read_buf);
-	printf("http_end_index == %d\n",http_end_index);
+	printf("%s", http_read_buf);
+	printf("http_end_index == %d\n", http_end_index);
 
 	//printf("出 read 函数　\n");
 	return true;
@@ -175,11 +175,6 @@ void http_conn::add_header()
 		ret = snprintf(http_header_buf + index,
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "Content-Type: text/html\r\n;charset=utf-8\r\n");
-	if (tmp.find(".jpg") != std::string::npos)
-		ret = snprintf(http_header_buf + index,
-					   HEADER_BUFFERSIZE - 1 - index,
-					   "%s", "Content-Type: image/jpg\r\n;charset=utf-8\r\n");
-
 	index += ret;
 
 	/*添加空白行*/
@@ -219,7 +214,7 @@ bool http_conn::process_write(HTTP_CODE ret)
 }
 void http_conn::process()
 {
-	HTTP_CODE read_ret = http_data_pack.HttpDataRead(http_read_buf,http_end_index);
+	HTTP_CODE read_ret = http_data_pack.HttpDataRead(http_read_buf, http_end_index);
 	if (read_ret == RE_NOT_ENOUGH)
 	{
 		modfd(EPOLLIN);
