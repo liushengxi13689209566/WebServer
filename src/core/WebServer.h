@@ -132,10 +132,7 @@ int WebServer::run()
 
 	while (true)
 	{
-		errno = 0;
 		int number = serv_epollfd.Wait();
-		perror("epoll_wait");
-
 		for (int i = 0; i < number; i++)
 		{
 			int sockfd = serv_epollfd.GetFdByIndex(i);
@@ -159,6 +156,7 @@ int WebServer::run()
 			else if (serv_epollfd.GetEventsByIndex(i) & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
 			{
 				/*如果有异常，直接关闭客户连接*/
+				perror("发生异常，关闭链接\n");
 				WebServer_closefd(epollfd, sockfd);
 			}
 			/*读事件*/

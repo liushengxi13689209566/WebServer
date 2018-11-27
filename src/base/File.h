@@ -24,7 +24,9 @@ class File
 
     explicit File(const char *path, mode_t mode = O_RDONLY)
     {
-        Open(path, mode);
+        fd_ = open(path, mode);
+        if (fd_ > 0)
+            stat(path, &file_stat);
     }
     ~File()
     {
@@ -38,12 +40,6 @@ class File
     inline off_t Size()
     {
         return file_stat.st_size;
-    }
-    inline void Open(const char *path, mode_t mode)
-    {
-        fd_ = open(path, mode);
-        if (fd_ > 0)
-            stat(path, &file_stat);
     }
     inline bool IsForbid()
     {

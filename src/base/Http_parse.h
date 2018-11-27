@@ -59,33 +59,40 @@ class HttpParse
     /*还需要检查成员*/
     HttpParse()
     {
+        retcode = RE_NOT_ENOUGH;
+        buffer = nullptr;
+        http_read_index = 0;
+        http_checked_index = 0;
+        http_start_line = 0;
         http_check_state = CHECK_REQUESTLINE;
-        http_keep_connect = false;
         http_method = GET;
+        memset(http_real_file, '\0', FILENAME_LEN);
         http_url = nullptr;
         http_version = nullptr;
-        http_content_length = 0;
         http_host = nullptr;
-        http_start_line = 0;
-        http_checked_index = 0;
-        http_all_length = 0;
-        memset(http_real_file, '\0', FILENAME_LEN);
+        http_content_length = 0;
+        http_keep_connect = false;
     }
     HttpParse(const HttpParse &) = delete;
     HttpParse &operator=(const HttpParse &) = delete;
 
-    HTTP_CODE HttpDataRead(char *http_read_buf)
+    /*正式读取一个完整的http报文*/
+    HTTP_CODE HttpDataRead(char *http_read_buf, int &temp)
     {
         buffer = http_read_buf;
-        http_all_length = strlen(buffer);
+        http_read_index = temp;
+        printf("http_read_index== %d\n", http_read_index);
+
         LINE_STATUS line_status = LINE_OK; /*记录当前行的状态*/
         retcode = RE_NOT_ENOUGH;           /*记录 http 请求的处理结果*/
         char *line = nullptr;
+
         /*主状态机，用于从　buffer 中取出所有完整的行,并对应进行分析　*/
         while (((http_check_state == CHECK_CONTENT) && (line_status == LINE_OK)) || ((line_status = ParseLine()) == LINE_OK))
         {
             line = buffer + http_start_line;
             http_start_line = http_checked_index; /*下一行的起始位置*/
+
             printf("get a line :%s \n", line);
             switch (http_check_state)
             {
@@ -95,7 +102,6 @@ class HttpParse
                 retcode = ParseRequestLine(line);
                 if (retcode == BAD_RE)
                     return BAD_RE;
-                http_check_state = CHECK_HEADER;
                 break;
             }
                 /*分析头部字段*/
@@ -139,15 +145,24 @@ class HttpParse
   private:
     HTTP_CODE DoRequest()
     {
-        std::string tmp = http_url;
-        if (tmp == "/")
-            strncpy(http_real_file, doc_root, strlen(doc_root));
+        printf("http_url ==  %s\n", http_url);
+
+        int len = strlen(doc_root);
+        strncpy(http_real_file, doc_root, len);
+
+        if (!strncmp(http_url, "/", 1))
+        {
+            strncpy(http_real_file + len, "index.html", FILENAME_LEN - 1 - len);
+        }
         else
         {
-            int len = strlen(doc_root);
             strncpy(http_real_file + len, http_url, FILENAME_LEN - 1 - len);
         }
-        file.Open(http_real_file, O_RDONLY);
+
+        printf("http_real_file==%s\n",http_real_file);
+        
+        File file(http_real_file, O_RDONLY);
+
         //printf("do_get_request ::http_real_file == %s\n", http_real_file);
 
         if (file.GetFileFd() < 0)
@@ -173,34 +188,34 @@ class HttpParse
     LINE_STATUS ParseLine()
     {
         /*要分析的字节范围是(http_checked_index～(http_read_index-1))　*/
-        char temp = 0;
-        for (; http_checked_index < http_all_length; ++http_checked_index)
+        char temp;
+        for (; http_checked_index < http_read_index; ++http_checked_index)
         {
             temp = buffer[http_checked_index];
             if (temp == '\r')
             {
-                if ((http_checked_index + 1) == http_all_length)
+                if ((http_checked_index + 1) == http_read_index)
+                {
                     return LINE_NOT_ENOUGH;
+                }
                 else if (buffer[http_checked_index + 1] == '\n')
                 {
-                    /*［xxx］＝＇＼0＇，xxx+1 */
                     buffer[http_checked_index++] = '\0';
                     buffer[http_checked_index++] = '\0';
                     return LINE_OK;
                 }
-                else
-                    return LINE_BAD;
+
+                return LINE_BAD;
             }
             else if (temp == '\n')
             {
-                if ((http_checked_index > 1) && buffer[http_checked_index - 1] == '\r')
+                if ((http_checked_index > 1) && (buffer[http_checked_index - 1] == '\r'))
                 {
                     buffer[http_checked_index - 1] = '\0';
                     buffer[http_checked_index++] = '\0';
                     return LINE_OK;
                 }
-                else
-                    return LINE_BAD;
+                return LINE_BAD;
             }
         }
         return LINE_NOT_ENOUGH;
@@ -209,7 +224,7 @@ class HttpParse
     HTTP_CODE ParseRequestLine(char *line)
     {
         http_url = strpbrk(line, " \t");
-        if (http_url == NULL)
+        if (!http_url)
         {
             return BAD_RE;
         }
@@ -217,17 +232,13 @@ class HttpParse
 
         char *method = line;
         if (strcasecmp(method, "GET") == 0)
-        {
             http_method = GET;
-        }
         else
-        {
             return BAD_RE;
-        }
-        http_url += strspn(http_url, " \t"); /*跳过分隔符*/
 
+        http_url += strspn(http_url, " \t"); /*跳过分隔符*/
         http_version = strpbrk(http_url, " \t");
-        if (http_version == NULL)
+        if (!http_version)
         {
             return BAD_RE;
         }
@@ -245,6 +256,7 @@ class HttpParse
         if (!http_url || http_url[0] != '/')
             return BAD_RE;
         //printf("http_url ==%s\n", http_url);
+        http_check_state = CHECK_HEADER;
         return RE_NOT_ENOUGH;
     }
     /*一行一行的分析头部字段*/
@@ -261,7 +273,8 @@ class HttpParse
                 http_check_state = CHECK_CONTENT;
                 return RE_NOT_ENOUGH;
             }
-            return ENOUGH_RE;
+            else
+                return ENOUGH_RE;
         }
         else if (strncasecmp(line, "Connection:", 11) == 0)
         {
@@ -292,7 +305,7 @@ class HttpParse
     }
     HTTP_CODE ParseContent(char *line)
     {
-        if (http_all_length >= (http_content_length + http_checked_index))
+        if (http_read_index >= (http_content_length + http_checked_index))
         {
             line[http_content_length] = '\0';
             return ENOUGH_RE;
@@ -303,11 +316,10 @@ class HttpParse
   private:
     /*返回码*/
     HTTP_CODE retcode = RE_NOT_ENOUGH;
-    File file;
     /*指向http报文地址*/
     char *buffer = nullptr;
-    /*http报文大小*/
-    int http_all_length = 0;
+    /*http报文尾部下一个字节*/
+    int http_read_index;
     /*正在分析的字符在读缓冲区中的位置*/
     int http_checked_index = 0;
     /*正在解析的行的起始位置*/
