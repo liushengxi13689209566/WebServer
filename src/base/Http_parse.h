@@ -62,7 +62,6 @@ class HttpParse
 
     inline void Init()
     {
-
         retcode = RE_NOT_ENOUGH;
         buffer = nullptr;
         http_read_index = 0;
