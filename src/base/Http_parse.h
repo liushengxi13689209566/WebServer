@@ -56,9 +56,13 @@ class HttpParse
 {
   public:
     /*sizeof(会退化成指针)，strlen(会取出实际字节数目)  */
-    /*还需要检查成员*/
-    HttpParse()
+    HttpParse() : file() { Init(); }
+    HttpParse(const HttpParse &) = delete;
+    HttpParse &operator=(const HttpParse &) = delete;
+
+    inline void Init()
     {
+
         retcode = RE_NOT_ENOUGH;
         buffer = nullptr;
         http_read_index = 0;
@@ -73,12 +77,11 @@ class HttpParse
         http_content_length = 0;
         http_keep_connect = false;
     }
-    HttpParse(const HttpParse &) = delete;
-    HttpParse &operator=(const HttpParse &) = delete;
-
-    /*正式读取一个完整的http报文*/
+    /*正式读取一个未知　http　报文的接口，所以必须在这里进行初始化*/
     HTTP_CODE HttpDataRead(char *http_read_buf, int &temp)
     {
+        Init();
+
         buffer = http_read_buf;
         http_read_index = temp;
         printf("http_read_index== %d\n", http_read_index);
@@ -159,9 +162,10 @@ class HttpParse
             strncpy(http_real_file + len, http_url, FILENAME_LEN - 1 - len);
         }
 
-        printf("http_real_file==%s\n",http_real_file);
-        
-        File file(http_real_file, O_RDONLY);
+        printf("http_real_file==%s\n", http_real_file);
+
+        //File file(http_real_file, O_RDONLY);
+        file.Open(http_real_file, O_RDONLY);
 
         //printf("do_get_request ::http_real_file == %s\n", http_real_file);
 
@@ -314,6 +318,7 @@ class HttpParse
     }
 
   private:
+    File file;
     /*返回码*/
     HTTP_CODE retcode = RE_NOT_ENOUGH;
     /*指向http报文地址*/

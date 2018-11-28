@@ -29,7 +29,7 @@ class http_conn
 	static const int HEADER_BUFFERSIZE = 1024;
 
   public:
-	http_conn() : Sockfd(false), http_data_pack()
+	http_conn() : http_data_pack(), Sockfd(false)
 	{
 		init();
 	}
@@ -124,8 +124,12 @@ bool http_conn::write()
 	Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 	printf("出 send_header 函数\n ");
 
+	printf(" 进入sendfile 函数\n");
+	printf(" 进入//////////fielname=%s\n", http_data_pack.GetFileName());
 	File file(http_data_pack.GetFileName(), O_RDONLY);
 	Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
+	
+	printf("  出sendfile 函数\n");
 
 	if (http_data_pack.IsKeep())
 	{

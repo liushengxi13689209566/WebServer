@@ -22,11 +22,9 @@ class File
     }
     File &operator=(const File &) = delete;
 
-    explicit File(const char *path, mode_t mode = O_RDONLY)
+    File(const char *path, mode_t mode = O_RDONLY)
     {
-        fd_ = open(path, mode);
-        if (fd_ > 0)
-            stat(path, &file_stat);
+        Open(path, mode);
     }
     ~File()
     {
@@ -44,6 +42,17 @@ class File
     inline bool IsForbid()
     {
         return !(file_stat.st_mode & S_IROTH);
+    }
+    inline bool Open(const char *path, mode_t mode = O_RDONLY)
+    {
+        fd_ = open(path, mode);
+        if (fd_ > 0)
+        {
+            stat(path, &file_stat);
+            return true;
+        }
+        else
+            return false;
     }
     inline bool IsDir()
     {
