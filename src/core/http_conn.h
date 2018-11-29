@@ -104,12 +104,10 @@ bool http_conn::read()
 	//printf("http_end_index ==%d\n", http_end_index);
 	if (http_end_index >= READ_BUFFERSIZE)
 		return false;
-	Sockfd.RecvAll(http_read_buf, READ_BUFFERSIZE, http_end_index, SOCK_NONBLOCK);
-	printf("%s", http_read_buf);
+	bool ret = Sockfd.RecvAll(http_read_buf, READ_BUFFERSIZE, http_end_index, SOCK_NONBLOCK);
+		return ret ;
+	//printf("%s", http_read_buf);
 	printf("http_end_index == %d\n", http_end_index);
-
-	//printf("出 read 函数　\n");
-	return true;
 }
 
 /*
@@ -126,9 +124,10 @@ bool http_conn::write()
 
 	printf(" 进入sendfile 函数\n");
 	printf(" 进入//////////fielname=%s\n", http_data_pack.GetFileName());
+
 	File file(http_data_pack.GetFileName(), O_RDONLY);
 	Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
-	
+
 	printf("  出sendfile 函数\n");
 
 	if (http_data_pack.IsKeep())

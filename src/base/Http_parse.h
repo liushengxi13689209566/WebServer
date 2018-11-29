@@ -59,6 +59,7 @@ class HttpParse
     HttpParse() : file() { Init(); }
     HttpParse(const HttpParse &) = delete;
     HttpParse &operator=(const HttpParse &) = delete;
+    ~HttpParse() {}
 
     inline void Init()
     {
@@ -164,7 +165,7 @@ class HttpParse
         printf("http_real_file==%s\n", http_real_file);
 
         //File file(http_real_file, O_RDONLY);
-        file.Open(http_real_file, O_RDONLY);
+        File file(http_real_file, O_RDONLY);
 
         //printf("do_get_request ::http_real_file == %s\n", http_real_file);
 

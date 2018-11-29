@@ -15,16 +15,17 @@ class File
 {
   public:
     File(){};
-    File(const File &file)
-    {
-        fd_ = file.fd_;
-        file_stat = file.file_stat;
-    }
+    File(const File &file) = delete;
     File &operator=(const File &) = delete;
 
-    File(const char *path, mode_t mode = O_RDONLY)
+    explicit File(const char *path, mode_t mode = O_RDONLY)
     {
-        Open(path, mode);
+        printf("打开文件\n");
+        fd_ = open(path, mode);
+        if (fd_ > 0)
+        {
+            stat(path, &file_stat);
+        }
     }
     ~File()
     {
@@ -42,17 +43,6 @@ class File
     inline bool IsForbid()
     {
         return !(file_stat.st_mode & S_IROTH);
-    }
-    inline bool Open(const char *path, mode_t mode = O_RDONLY)
-    {
-        fd_ = open(path, mode);
-        if (fd_ > 0)
-        {
-            stat(path, &file_stat);
-            return true;
-        }
-        else
-            return false;
     }
     inline bool IsDir()
     {
