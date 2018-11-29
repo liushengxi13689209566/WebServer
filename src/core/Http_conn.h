@@ -27,6 +27,11 @@ class HttpConn
 	/*写头部缓冲区大小*/
 	static const int HEADER_BUFFERSIZE = 1024;
 
+	/*该连接的sockfd和对方的地址*/
+	int http_sockfd = 0;
+	sockaddr_in http_address;
+	static int http_epollfd;
+
   public:
 	HttpConn() : http_data_pack(), Sockfd(false)
 	{
@@ -34,11 +39,8 @@ class HttpConn
 	}
 	HttpConn(const HttpConn &conn) = delete;
 	HttpConn &operator=(const HttpConn &) = delete;
-	~HttpConn()
-	{
-	}
+	~HttpConn() {}
 
-  public:
 	inline void HttpInit()
 	{
 		Sockfd.SetFd(http_sockfd);
@@ -48,7 +50,7 @@ class HttpConn
 		memset(http_header_buf, '\0', HEADER_BUFFERSIZE);
 		http_have_sended = 0;
 	}
-	void HttpClose()
+	inline void HttpClose()
 	{
 		if (http_sockfd != -1)
 		{
@@ -62,7 +64,7 @@ class HttpConn
 	}
 
 	/*循环读取客户数据，直到无数据可读或者对方关闭连接*/
-	bool HttpRead()
+	inline bool HttpRead()
 	{
 		//printf("进入　read 函数 \n");
 		//printf("http_end_index ==%d\n", http_end_index);
@@ -74,18 +76,12 @@ class HttpConn
 		//printf("http_end_index == %d\n", http_end_index);
 	}
 	/*
-	触发　写事件　，进行写的操作．
-	先发送头部（头部信息已经构建好了［在http_header_buf中］）过去，然后调用 sendfile 将请求所对应的文件发送过去　
-	考虑是否保存　连接
-	响应请求*/
+	触发写事件,响应请求*/
 	bool HttpWrite()
 	{
 		printf(" 进入http_conn::write函数\n");
 		Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 		printf("出 send_header 函数\n ");
-
-		printf(" 进入sendfile 函数\n");
-		printf(" 进入//////////fielname=%s\n", http_data_pack.GetFileName());
 
 		File file(http_data_pack.GetFileName(), O_RDONLY);
 		Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
@@ -126,7 +122,7 @@ class HttpConn
 	}
 
   private:
-	void Modfd(int ev)
+	inline void Modfd(const int &ev)
 	{
 		epoll_event event;
 		event.data.fd = http_sockfd;
@@ -135,17 +131,67 @@ class HttpConn
 		if (ret < 0)
 			throw CallFailed("Http_conn.cc 文件: epoll_ctl function failed !!! at line  ", __LINE__);
 	}
-	
-	/*ProcessWrite 所使用的函数*/
-	bool ProcessWrite(HTTP_CODE ret);
-	void AddStatueLine(int status, const char *title);
-	void AddHeader();
+	void AddStatueLine(int status, const char *title)
+	{
+		http_header_index = 0;
+		//printf("1.addd_status_line : http_header_buf ==%s\n", http_header_buf);
+		int ret = snprintf(http_header_buf, HEADER_BUFFERSIZE - 1, "HTTP/1.1 %d %s\r\n", status, title);
+		http_header_index += ret;
+		//printf("2.addd_status_line : http_header_buf ==%s\n", http_header_buf);
+	}
+	void AddHeader()
+	{
+		int &index = http_header_index;
+		int ret = snprintf(http_header_buf + index,
+						   HEADER_BUFFERSIZE - 1 - index,
+						   "Connection: %s\r\n",
+						   (http_data_pack.IsKeep() == true)
+							   ? "keep-alive"
+							   : "close");
+		index += ret;
+		/*添加文件类型*/
+		std::string tmp = http_data_pack.GetFileName();
+		if (tmp.find(".html") != std::string::npos)
+			ret = snprintf(http_header_buf + index,
+						   HEADER_BUFFERSIZE - 1 - index,
+						   "%s", "Content-Type: text/html\r\n;charset=utf-8\r\n");
+		index += ret;
 
-  public:
-	/*该连接的sockfd和对方的地址*/
-	int http_sockfd = 0;
-	sockaddr_in http_address;
-	static int http_epollfd;
+		/*添加空白行*/
+		ret = snprintf(http_header_buf + index,
+					   HEADER_BUFFERSIZE - 1 - index,
+					   "%s", "\r\n");
+		index += ret;
+
+		//printf("addd_header : http_header_buf ==%s\n", http_header_buf);
+	}
+	/*ProcessWrite 所使用的函数*/
+	bool ProcessWrite(HTTP_CODE ret)
+	{
+		//printf("进入process_write 函数\n");
+
+		switch (ret)
+		{
+		case FILE_RE:
+		{
+			AddStatueLine(200, ok_200_title);
+			AddHeader();
+			/*从这里下来，就构造好了http的头部，但是因为没有修改事件类型，所以没有任何的发送的情况*/
+			break;
+		}
+		case SERVER_ERROR:
+		{
+			break;
+		}
+		default:
+		{
+		}
+		}
+
+		//printf("出　process_write 函数\n");
+
+		return true;
+	}
 
   private:
 	/*http 解析类*/
@@ -165,65 +211,5 @@ class HttpConn
 
 int HttpConn::http_epollfd = -1;
 
-void HttpConn::AddStatueLine(int status, const char *title)
-{
-	http_header_index = 0;
-	//printf("1.addd_status_line : http_header_buf ==%s\n", http_header_buf);
-	int ret = snprintf(http_header_buf, HEADER_BUFFERSIZE - 1, "HTTP/1.1 %d %s\r\n", status, title);
-	http_header_index += ret;
-	//printf("2.addd_status_line : http_header_buf ==%s\n", http_header_buf);
-}
-void HttpConn::AddHeader()
-{
-	int &index = http_header_index;
-	int ret = snprintf(http_header_buf + index,
-					   HEADER_BUFFERSIZE - 1 - index,
-					   "Connection: %s\r\n",
-					   (http_data_pack.IsKeep() == true)
-						   ? "keep-alive"
-						   : "close");
-	index += ret;
-	/*添加文件类型*/
-	std::string tmp = http_data_pack.GetFileName();
-	if (tmp.find(".html") != std::string::npos)
-		ret = snprintf(http_header_buf + index,
-					   HEADER_BUFFERSIZE - 1 - index,
-					   "%s", "Content-Type: text/html\r\n;charset=utf-8\r\n");
-	index += ret;
 
-	/*添加空白行*/
-	ret = snprintf(http_header_buf + index,
-				   HEADER_BUFFERSIZE - 1 - index,
-				   "%s", "\r\n");
-	index += ret;
-
-	//printf("addd_header : http_header_buf ==%s\n", http_header_buf);
-}
-
-bool HttpConn::ProcessWrite(HTTP_CODE ret)
-{
-	//printf("进入process_write 函数\n");
-
-	switch (ret)
-	{
-	case FILE_RE:
-	{
-		AddStatueLine(200, ok_200_title);
-		AddHeader();
-		/*从这里下来，就构造好了http的头部，但是因为没有修改事件类型，所以没有任何的发送的情况*/
-		break;
-	}
-	case SERVER_ERROR:
-	{
-		break;
-	}
-	default:
-	{
-	}
-	}
-
-	//printf("出　process_write 函数\n");
-
-	return true;
-}
 #endif
