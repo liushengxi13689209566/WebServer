@@ -48,6 +48,19 @@ class HttpConn
 		memset(http_header_buf, '\0', HEADER_BUFFERSIZE);
 		http_have_sended = 0;
 	}
+	void HttpClose()
+	{
+		if (http_sockfd != -1)
+		{
+			int ret = epoll_ctl(http_epollfd, EPOLL_CTL_DEL, http_sockfd, 0);
+			if (ret < 0)
+				throw CallFailed("Http_conn.cc 文件: epoll_ctl function failed !!! at line  ", __LINE__);
+			Sockfd.Close();
+			http_sockfd = -1;
+			// sum_user_count--; /*关闭一个连接减去一个用户*/
+		}
+	}
+
 	/*循环读取客户数据，直到无数据可读或者对方关闭连接*/
 	bool HttpRead()
 	{
@@ -122,23 +135,11 @@ class HttpConn
 		if (ret < 0)
 			throw CallFailed("Http_conn.cc 文件: epoll_ctl function failed !!! at line  ", __LINE__);
 	}
-	void HttpClose()
-	{
-		if (http_sockfd != -1)
-		{
-			int ret = epoll_ctl(http_epollfd, EPOLL_CTL_DEL, http_sockfd, 0);
-			if (ret < 0)
-				throw CallFailed("Http_conn.cc 文件: epoll_ctl function failed !!! at line  ", __LINE__);
-			Sockfd.Close();
-			http_sockfd = -1;
-			// sum_user_count--; /*关闭一个连接减去一个用户*/
-		}
-	}
-
+	
 	/*ProcessWrite 所使用的函数*/
 	bool ProcessWrite(HTTP_CODE ret);
-	void add_status_line(int status, const char *title);
-	void add_header();
+	void AddStatueLine(int status, const char *title);
+	void AddHeader();
 
   public:
 	/*该连接的sockfd和对方的地址*/
@@ -164,7 +165,7 @@ class HttpConn
 
 int HttpConn::http_epollfd = -1;
 
-void HttpConn::add_status_line(int status, const char *title)
+void HttpConn::AddStatueLine(int status, const char *title)
 {
 	http_header_index = 0;
 	//printf("1.addd_status_line : http_header_buf ==%s\n", http_header_buf);
@@ -172,7 +173,7 @@ void HttpConn::add_status_line(int status, const char *title)
 	http_header_index += ret;
 	//printf("2.addd_status_line : http_header_buf ==%s\n", http_header_buf);
 }
-void HttpConn::add_header()
+void HttpConn::AddHeader()
 {
 	int &index = http_header_index;
 	int ret = snprintf(http_header_buf + index,
@@ -207,8 +208,8 @@ bool HttpConn::ProcessWrite(HTTP_CODE ret)
 	{
 	case FILE_RE:
 	{
-		add_status_line(200, ok_200_title);
-		add_header();
+		AddStatueLine(200, ok_200_title);
+		AddHeader();
 		/*从这里下来，就构造好了http的头部，但是因为没有修改事件类型，所以没有任何的发送的情况*/
 		break;
 	}

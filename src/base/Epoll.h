@@ -22,7 +22,7 @@ class Epoll
         close(epollfd_); /*不抛异常*/
     }
 
-    inline int Add(struct epoll_event &ev, int &fd)
+    inline int Add(struct epoll_event &ev, const int &fd)
     {
         int ret = epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &ev);
         if (ret < 0)
