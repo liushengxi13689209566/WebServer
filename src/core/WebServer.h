@@ -11,7 +11,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "http_conn.h"
+#include "./Http_conn.h"
 
 #include "../base/Epoll.h"
 #include "../base/Thread_pool.h"
@@ -74,7 +74,7 @@ class WebServer
   private:
 	ServSocket serv_socket;
 	Epoll serv_epollfd;
-	std::unordered_map<int, http_conn> users; /*任务类对象*/
+	std::unordered_map<int, HttpConn> users; /*任务类对象*/
 
   public:
 	static int sum_user_count; /*总用户*/
@@ -92,7 +92,7 @@ void WebServer::WebServerInit(int connfd, const sockaddr_in &client_address)
 	AddFd(connfd, true);
 	WebServer::sum_user_count++;
 	users[connfd].http_sockfd = connfd;
-	users[connfd].init();
+	users[connfd].HttpInit();
 	users[connfd].http_address = client_address;
 }
 void WebServer::WebServer_closefd(int epollfd, int connfd)
@@ -101,8 +101,8 @@ void WebServer::WebServer_closefd(int epollfd, int connfd)
 	{
 		users[connfd].http_sockfd = -1;
 		this->sum_user_count--;
-		Epoll_ctl(epollfd, EPOLL_CTL_DEL, connfd, 0);
-		Close(connfd);
+		epoll_ctl(epollfd, EPOLL_CTL_DEL, connfd, 0);
+		close(connfd);
 	}
 }
 int WebServer::run()
@@ -121,7 +121,7 @@ int WebServer::run()
 
 	int listenfd = serv_socket.GetBaseSocket();
 
-	http_conn::http_epollfd = serv_epollfd.GetEpollFd();
+	HttpConn::http_epollfd = serv_epollfd.GetEpollFd();
 	int epollfd = serv_epollfd.GetEpollFd();
 
 	struct epoll_event event;
@@ -143,13 +143,13 @@ int WebServer::run()
 
 				struct sockaddr_in client_address;
 				socklen_t client_len = sizeof(client_address);
-				int connfd = serv_socket.Accept(reinterpret_cast<struct sockaddr *>(&client_address), &client_len);
+		int connfd = serv_socket.Accept(reinterpret_cast<struct sockaddr *>(&client_address), &client_len);
 				if (sum_user_count >= MAX_FD)
 				{
 					/*发送一个服务器繁忙的信息过去,待完成*/
 					continue;
 				}
-				/*如果不存在会直接插入 map<connfd,http_conn> 进去*/
+				/*如果不存在会直接插入 map<connfd,HttpConn> 进去*/
 				WebServerInit(connfd, client_address);
 			}
 			/*出错*/
@@ -163,10 +163,10 @@ int WebServer::run()
 			else if (serv_epollfd.GetEventsByIndex(i) & EPOLLIN)
 			{
 				printf("读事件\n");
-				if (users[sockfd].read())
+				if (users[sockfd].HttpRead())
 				{
 					printf("读事件　完成！！！\n");
-					if (!pool.append(std::bind(&http_conn::process, &users[sockfd])))
+					if (!pool.append(std::bind(&HttpConn::Process, &users[sockfd])))
 					{
 						printf("append 失败！！！！\n");
 					}
@@ -181,7 +181,7 @@ int WebServer::run()
 			else if (serv_epollfd.GetEventsByIndex(i) & EPOLLOUT)
 			{
 				printf("写事件\n");
-				if (!users[sockfd].write())
+				if (!users[sockfd].HttpWrite())
 					WebServer_closefd(epollfd, sockfd);
 				printf("*****************写事件完成\n");
 			}
@@ -191,7 +191,7 @@ int WebServer::run()
 			}
 		}
 	}
-	Close(epollfd);
+	close(epollfd);
 	return 0;
 }
 #endif
