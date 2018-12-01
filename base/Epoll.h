@@ -2,9 +2,8 @@
 #define _EPOLL_H
 
 #include "./base.hpp"
-
-const int MAX_EVENT_NUMBER = 10000;
-
+//#include "./Server_init.h"
+const int MAX_EVENTS_NUMBER = 10000;
 class Epoll
 {
   public:
@@ -53,7 +52,7 @@ class Epoll
     inline int Wait()
     {
         /* -1: 代表阻塞　*/
-        int ret = epoll_wait(epollfd_, events, MAX_EVENT_NUMBER, -1);
+        int ret = epoll_wait(epollfd_, events, MAX_EVENTS_NUMBER, -1);
         /*epoll_wait　出错　*/
         if ((ret < 0) && (errno != EINTR))
             throw CallFailed("Epoll.hpp 文件：epoll_wait function failed !!! at line  ", __LINE__);
@@ -76,6 +75,6 @@ class Epoll
 
   private:
     int epollfd_ = -1;
-    struct epoll_event events[MAX_EVENT_NUMBER];
+    struct epoll_event events[MAX_EVENTS_NUMBER];
 };
 #endif
