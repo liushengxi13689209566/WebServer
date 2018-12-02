@@ -64,7 +64,7 @@ class BaseSocket
 	*/
     inline bool Sendfile(int in_fd, off_t *offset, size_t count, ssize_t &http_have_sended)
     {
-        ssize_t bytes_have_send = 0;
+        size_t bytes_have_send = 0;
         ssize_t ret = 0;
         while (bytes_have_send != count)
         {

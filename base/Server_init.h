@@ -57,30 +57,32 @@ class ServerInit
 	ServerInit &operator=(const ServerInit &) = delete;
 	~ServerInit() {}
 
-	ServerInit() : http_fp("../config/Http_init.json"), server_fp("../config/Server_init.json")
+	ServerInit() : http_fp("../config/Http_init.json") /* , server_fp("../config/Server_init.json") */
 	{
 		//InitServer();
 		InitHttp();
 	}
 
   private:
-	void InitServer()
-	{
-		rapidjson::FileReadStream stream(server_fp.GetFp(), read_buffer, sizeof(read_buffer));
-		rapidjson::Document bank;
-		bank.ParseStream(stream);
-		assert(bank.IsObject());
+	// void InitServer()
+	// {
+	// 	rapidjson::FileReadStream stream(server_fp.GetFp(), read_buffer, sizeof(read_buffer));
+	// 	rapidjson::Document bank;
+	// 	bank.ParseStream(stream);
+	// 	assert(bank.IsObject());
 
-		static const int MAX_FD = bank["server-config"]["max-fd"].GetInt();
-		static const int MAX_EPOLL_EVENTS = bank["server-config"]["max-epoll-events"].GetInt();
-		static const int MAX_THREADS = bank["server-config"]["max-threads"].GetInt();
-		static const int READ_BUFFER = bank["server-config"]["read-buffer"].GetInt();
-		static const int WRITE_BUFFER = bank["server-config"]["write-buffer"].GetInt();
-		static const int MAX_FILE_LEN = bank["server-config"]["filename-len"].GetInt();
-		static const std::string doc_root = bank["default-config"]["www-root"].GetString();
-	}
+	// 	static const int MAX_FD = bank["server-config"]["max-fd"].GetInt();
+	// 	static const int MAX_EPOLL_EVENTS = bank["server-config"]["max-epoll-events"].GetInt();
+	// 	static const int MAX_THREADS = bank["server-config"]["max-threads"].GetInt();
+	// 	static const int READ_BUFFER = bank["server-config"]["read-buffer"].GetInt();
+	// 	static const int WRITE_BUFFER = bank["server-config"]["write-buffer"].GetInt();
+	// 	static const int MAX_FILE_LEN = bank["server-config"]["filename-len"].GetInt();
+	// 	static const std::string doc_root = bank["default-config"]["www-root"].GetString();
+	// }
 	void InitHttp()
 	{
+		//printf("进入InitHttp 函数\n");
+
 		rapidjson::FileReadStream stream(http_fp.GetFp(), read_buffer, sizeof(read_buffer));
 
 		rapidjson::Document bank;
@@ -95,6 +97,8 @@ class ServerInit
 		{
 			ConfigValue::Type.insert({v["ext"].GetString(), v["type"].GetString()});
 		}
+		//for (auto &t : ConfigValue::Type)
+		//	std::cout << t.first << " , " << t.second << std::endl;
 
 		const rapidjson::Value &status = bank["http-status-string"];
 		assert(status.IsArray());
@@ -107,7 +111,7 @@ class ServerInit
 
 	char read_buffer[65535];
 	BaseFp http_fp;
-	BaseFp server_fp;
+	//BaseFp server_fp;
 };
 } // namespace ConfigServer
 

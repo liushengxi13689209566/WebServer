@@ -10,6 +10,7 @@
 
 #include "../base/Http_parse.h"
 #include "../base/Socket.h"
+#include "../base/Server_init.h"
 
 const char *ok_200_title = "OK";
 const char *error_500_title = "Serverr error";
@@ -149,10 +150,17 @@ class HttpConn
 		index += ret;
 		/*添加文件类型*/
 		std::string tmp = http_data_pack.GetFileName();
-		if (tmp.find(".html") != std::string::npos)
+
+		std::string key;
+		auto idx = tmp.rfind('.');
+
+		if (idx != std::string::npos)
+		{
+			key = tmp.substr(idx);
 			ret = snprintf(http_header_buf + index,
 						   HEADER_BUFFERSIZE - 1 - index,
-						   "%s", "Content-Type: text/html\r\n;charset=utf-8\r\n");
+						   "%s\r\n;%s", ConfigValue::Type[key].c_str(), "charset=utf-8\r\n");
+		}
 		index += ret;
 
 		/*添加空白行*/
@@ -161,7 +169,7 @@ class HttpConn
 					   "%s", "\r\n");
 		index += ret;
 
-		//printf("addd_header : http_header_buf ==%s\n", http_header_buf);
+		printf("addd_header : http_header_buf ==%s\n", http_header_buf);
 	}
 	/*ProcessWrite 所使用的函数*/
 	bool ProcessWrite(HTTP_CODE ret)

@@ -11,5 +11,4 @@ using namespace std;
 int main(void)
 {
 	ConfigServer::ServerInit iii;
-	cout << ConfigServer::ServerInit::MAX_FD << endl;
 }
