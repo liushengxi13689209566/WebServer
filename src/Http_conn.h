@@ -20,8 +20,6 @@ const char *error_404_path = "./404.html";
 class HttpConn
 {
   public:
-	/*文件名最大长度*/
-	static const int FILENAME_LEN = 200;
 	/*读缓冲区大小*/
 	static const int READ_BUFFERSIZE = 2048;
 	/*写头部缓冲区大小*/
@@ -187,9 +185,7 @@ class HttpConn
 		{
 		}
 		}
-
 		//printf("出　process_write 函数\n");
-
 		return true;
 	}
 
@@ -210,6 +206,5 @@ class HttpConn
 };
 
 int HttpConn::http_epollfd = -1;
-
 
 #endif

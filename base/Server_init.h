@@ -20,14 +20,6 @@ namespace ConfigValue
 std::map<std::string, std::string> Type;
 std::map<int, std::string> Status;
 
-int MAX_FD = 0;
-int MAX_EPOLL_EVENTS = 10;
-int MAX_THREADS = 0;
-int READ_BUFFER = 0;
-int WRITE_BUFFER = 0;
-int MAX_FILE_LEN = 0;
-std::string doc_root;
-
 } // namespace ConfigValue
 
 namespace ConfigServer
@@ -35,6 +27,7 @@ namespace ConfigServer
 class BaseFp
 {
   public:
+	BaseFp() {}
 	BaseFp(const BaseFp &) = delete;
 	BaseFp &operator=(const BaseFp &) = delete;
 
@@ -66,7 +59,7 @@ class ServerInit
 
 	ServerInit() : http_fp("../config/Http_init.json"), server_fp("../config/Server_init.json")
 	{
-		InitServer();
+		//InitServer();
 		InitHttp();
 	}
 
@@ -78,13 +71,13 @@ class ServerInit
 		bank.ParseStream(stream);
 		assert(bank.IsObject());
 
-		ConfigValue::MAX_FD = bank["server-config"]["max-fd"].GetInt();
-		ConfigValue::MAX_EPOLL_EVENTS = bank["server-config"]["max-epoll-events"].GetInt();
-		ConfigValue::MAX_THREADS = bank["server-config"]["max-threads"].GetInt();
-		ConfigValue::READ_BUFFER = bank["server-config"]["read-buffer"].GetInt();
-		ConfigValue::WRITE_BUFFER = bank["server-config"]["write-buffer"].GetInt();
-		ConfigValue::MAX_FILE_LEN = bank["server-config"]["filename-len"].GetInt();
-		doc_root = bank["default-config"]["www-root"].GetString();
+		static const int MAX_FD = bank["server-config"]["max-fd"].GetInt();
+		static const int MAX_EPOLL_EVENTS = bank["server-config"]["max-epoll-events"].GetInt();
+		static const int MAX_THREADS = bank["server-config"]["max-threads"].GetInt();
+		static const int READ_BUFFER = bank["server-config"]["read-buffer"].GetInt();
+		static const int WRITE_BUFFER = bank["server-config"]["write-buffer"].GetInt();
+		static const int MAX_FILE_LEN = bank["server-config"]["filename-len"].GetInt();
+		static const std::string doc_root = bank["default-config"]["www-root"].GetString();
 	}
 	void InitHttp()
 	{

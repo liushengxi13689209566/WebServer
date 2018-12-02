@@ -2,8 +2,9 @@
 #define _EPOLL_H
 
 #include "./base.hpp"
-//#include "./Server_init.h"
+
 const int MAX_EVENTS_NUMBER = 10000;
+
 class Epoll
 {
   public:
