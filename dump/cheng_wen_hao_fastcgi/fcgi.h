@@ -8,7 +8,6 @@ typedef struct
     int sockfd_;    //与php-fpm 建立的 sockfd
     int requestId_; //record 里的请求ID
     int flag_;      //用来标志当前读取内容是否为html内容
-
 } FastCgi_t;
 
 void FastCgi_init(FastCgi_t *c);
@@ -46,6 +45,6 @@ int sendParams(FastCgi_t *c, char *name, char *value);
 int sendEndRequestRecord(FastCgi_t *c);
 
 //只读php-fpm 返回内容，读到的内容处理后期再添加
-int readFromPhp(FastCgi_t *c);
+char *readFromPhp(FastCgi_t *c, int *len);
 
 #endif

@@ -5,5 +5,5 @@ main.o:fcgi.h
 fcgi.o:fcgi.h
 		cc -c fcgi.c -std=c99
 .PHONY:clean
-	clean:
+clean:
 		rm *.o main
