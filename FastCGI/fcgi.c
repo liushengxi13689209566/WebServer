@@ -17,17 +17,17 @@
 #include <netinet/in.h>
 #include <errno.h>
 
-static const int PARAMS_BUFF_LEN = 1024;  //环境参数buffer的大小
-static const int CONTENT_BUFF_LEN = 1024; //内容buffer的大小
+static const int PARAMS_BUFF_LEN = 2048;  //环境参数buffer的大小
+static const int CONTENT_BUFF_LEN = 2048; //内容buffer的大小
 
 static char *findStartHtml(char *content);
 static void getHtmlFromContent(FastCgi_t *c, char *content);
 
 void FastCgi_init(FastCgi_t *c)
 {
-    c->sockfd_ = 0;
-    c->flag_ = 0;
-    c->requestId_ = 0;
+    c->sockfd_ = 0;    //与php-fpm 建立的 sockfd
+    c->flag_ = 0;      //record 里的请求ID
+    c->requestId_ = 0; //用来标志当前读取内容是否为html内容
 }
 
 void FastCgi_finit(FastCgi_t *c)
@@ -199,6 +199,7 @@ int sendParams(FastCgi_t *c, char *name, char *value)
 
     FCGI_Header nameValueHeader;
     nameValueHeader = makeHeader(FCGI_PARAMS, c->requestId_, bodyLen, 0);
+    /*8 字节的消息头*/
 
     int nameValueRecordLen = bodyLen + FCGI_HEADER_LEN;
     char nameValueRecord[nameValueRecordLen];
@@ -246,7 +247,12 @@ int readFromPhp(FastCgi_t *c)
 
             /* 读取获取内容 */
             ret = read(c->sockfd_, content, contentLen);
+            printf("ret ==  %d\n", ret);
+
             assert(ret == contentLen);
+
+            /*test*/
+            printf("content == %s \n", content);
 
             getHtmlFromContent(c, content);
 

@@ -149,6 +149,18 @@ class HttpParse
     {
         return http_keep_connect;
     }
+    inline bool IsPhp()
+    {
+        std::string tmp = http_real_file;
+        std::string file_type;
+        auto idx = tmp.rfind('.');
+
+        if (idx != std::string::npos)
+        {
+            file_type = tmp.substr(idx);
+        }
+        return file_type == ".php";
+    }
 
   private:
     HTTP_CODE DoRequest()
@@ -173,8 +185,9 @@ class HttpParse
 
         File file(http_real_file, O_RDONLY);
 
-        //printf("do_get_request ::http_real_file == %s\n", http_real_file);
-
+        printf("fddddddddddddddddddddddddddddddddd == %d\n", file.GetFileFd());
+        /*有三种情况，1（html）　2　(php)　3　(url中带有参数)*/
+        // 在这里进行处理
         if (file.GetFileFd() < 0)
         {
             return NO_RESOURCE;
@@ -190,6 +203,7 @@ class HttpParse
         //printf("出 do_get_request 函数　\n");
         else
         {
+            printf("66666666666666666666666666666666666666666666666666666666666666666\n");
             return FILE_RE;
         }
     }

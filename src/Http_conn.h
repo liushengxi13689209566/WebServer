@@ -11,6 +11,7 @@
 #include "../base/Http_parse.h"
 #include "../base/Socket.h"
 #include "../base/Server_init.h"
+#include "../FastCGI/fcgi.h"
 
 const char *ok_200_title = "OK";
 const char *error_500_title = "Serverr error";
@@ -174,12 +175,13 @@ class HttpConn
 	/*ProcessWrite 所使用的函数*/
 	bool ProcessWrite(HTTP_CODE ret)
 	{
-		//printf("进入process_write 函数\n");
+		printf("进入process_write 函数\n");
 
 		switch (ret)
 		{
 		case FILE_RE: /*文件请求*/
 		{
+			printf("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{\n");
 			Response();
 			/*没有修改事件类型，所以没有任何的发送的情况*/
 			break;
@@ -211,15 +213,35 @@ class HttpConn
 			break;
 		}
 	}
+	/*有三种情况，1（html）　2　(php)　3　(url中带有参数)*/
 	void ResponseGet()
 	{
-		// if (http_data_pack.IsDynamic())
-		// {
-		// }
-		// else
-		// {
-		AddHeader();
-		// }
+		printf("进入 ReSponseGet() 函数\n");
+		if (http_data_pack.IsPhp())
+		{
+			std::cout << "---------------------------------php文件" << std::endl;
+			std::cout << http_data_pack.GetFileName() << std::endl;
+
+			FastCgi_t *c;
+			c = (FastCgi_t *)malloc(sizeof(FastCgi_t));
+			FastCgi_init(c);
+			setRequestId(c, 1);
+			startConnect(c);
+			sendStartRequestRecord(c);
+
+			printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
+
+			sendParams(c, "SCRIPT_FILENAME", http_data_pack.GetFileName());
+			sendParams(c, "REQUEST_METHOD", "GET");
+			sendEndRequestRecord(c);
+			readFromPhp(c);
+			FastCgi_finit(c);
+		}
+		else
+		{
+			/*普通的静态html文件，直接的发送给客户端即可*/
+			AddHeader();
+		}
 	}
 	void ResponsePost()
 	{

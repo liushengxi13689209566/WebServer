@@ -6,9 +6,12 @@
  ************************************************************************/
 
 #include "./Server_init.h"
+#include "./File.h"
 
 using namespace std;
 int main(void)
 {
-	ConfigServer::ServerInit iii;
+	int fd = open("/home/Shengxi-Liu/Webserver/wwwroot/php/Hello.php", O_RDONLY);
+	if (fd < 0)
+		printf("文件不存在\n");
 }
