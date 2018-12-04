@@ -181,7 +181,6 @@ class HttpConn
 		{
 		case FILE_RE: /*文件请求*/
 		{
-			printf("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{\n");
 			Response();
 			/*没有修改事件类型，所以没有任何的发送的情况*/
 			break;
@@ -216,12 +215,9 @@ class HttpConn
 	/*有三种情况，1（html）　2　(php)　3　(url中带有参数)*/
 	void ResponseGet()
 	{
-		printf("进入 ReSponseGet() 函数\n");
 		if (http_data_pack.IsPhp())
 		{
 			std::cout << "---------------------------------php文件" << std::endl;
-			std::cout << http_data_pack.GetFileName() << std::endl;
-
 			FastCgi_t *c;
 			c = (FastCgi_t *)malloc(sizeof(FastCgi_t));
 			FastCgi_init(c);

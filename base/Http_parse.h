@@ -170,11 +170,9 @@ class HttpParse
         int len = strlen(doc_root);
         strncpy(http_real_file, doc_root, len);
 
-        printf("http_real_file==%s\n", http_real_file);
-
         if (!strcmp(http_url, "/"))
         {
-            strncpy(http_real_file + len, "html/index.html", FILENAME_LEN - 1 - len);
+            strncpy(http_real_file + len, "/html/index.html", FILENAME_LEN - 1 - len);
         }
         else
         {
@@ -203,7 +201,6 @@ class HttpParse
         //printf("出 do_get_request 函数　\n");
         else
         {
-            printf("66666666666666666666666666666666666666666666666666666666666666666\n");
             return FILE_RE;
         }
     }
