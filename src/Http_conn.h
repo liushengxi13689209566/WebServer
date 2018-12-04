@@ -213,7 +213,7 @@ class HttpConn
 	}
 	void ResponseGet()
 	{
-		// if (http_data_pack.IsDynamic()) /*fastcgi*/
+		// if (http_data_pack.IsDynamic())
 		// {
 		// }
 		// else

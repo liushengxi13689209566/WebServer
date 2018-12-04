@@ -84,6 +84,7 @@ class HttpParse
 
         buffer = http_read_buf;
         http_read_index = temp;
+
         printf("http_read_index== %d\n", http_read_index);
 
         LINE_STATUS line_status = LINE_OK; /*记录当前行的状态*/
@@ -157,9 +158,11 @@ class HttpParse
         int len = strlen(doc_root);
         strncpy(http_real_file, doc_root, len);
 
-        if (!strncmp(http_url, "/", 1))
+        printf("http_real_file==%s\n", http_real_file);
+
+        if (!strcmp(http_url, "/"))
         {
-            strncpy(http_real_file + len, "index.html", FILENAME_LEN - 1 - len);
+            strncpy(http_real_file + len, "html/index.html", FILENAME_LEN - 1 - len);
         }
         else
         {
