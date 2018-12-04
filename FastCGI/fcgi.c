@@ -20,9 +20,6 @@
 static const int PARAMS_BUFF_LEN = 2048;  //环境参数buffer的大小
 static const int CONTENT_BUFF_LEN = 2048; //内容buffer的大小
 
-static char *findStartHtml(char *content);
-static void getHtmlFromContent(FastCgi_t *c, char *content);
-
 void FastCgi_init(FastCgi_t *c)
 {
     c->sockfd_ = 0;    //与php-fpm 建立的 sockfd
@@ -227,7 +224,7 @@ int sendEndRequestRecord(FastCgi_t *c)
     return 1;
 }
 
-int readFromPhp(FastCgi_t *c)
+char *readFromPhp(FastCgi_t *c)
 {
     FCGI_Header responderHeader;
     char content[CONTENT_BUFF_LEN];
@@ -252,9 +249,9 @@ int readFromPhp(FastCgi_t *c)
             assert(ret == contentLen);
 
             /*test*/
-            printf("content == %s \n", content);
+            // printf("content == %s \n", content);
 
-            getHtmlFromContent(c, content);
+            //getHtmlFromContent(c, content);
 
             /* 跳过填充部分 */
             if (responderHeader.paddingLength > 0)
@@ -288,39 +285,41 @@ int readFromPhp(FastCgi_t *c)
             assert(ret == sizeof(endRequest));
         }
     }
-
-    return 1;
+    return content;
 }
 
-char *findStartHtml(char *content)
+char *findStartHtml(char *p)
 {
-    for (; *content != '\0'; content++)
+    enum
     {
-        if (*content == '<')
-            return content;
-    }
-    return NULL;
-}
+        S_NOPE,
+        S_CR,
+        S_CRLF,
+        S_CRLFCR,
+        S_CRLFCRLF
+    } state = S_NOPE;
 
-void getHtmlFromContent(FastCgi_t *c, char *content)
-{
-    /* 保存html内容开始位置 */
-    char *pt;
-
-    /* 读取到的content是html内容 */
-    if (c->flag_ == 1)
+    for (char *content = p; *content != '\0'; content++) //状态机
     {
-        printf("%s", content);
-    }
-    else
-    {
-        if ((pt = findStartHtml(content)) != NULL)
+        switch (state)
         {
-            c->flag_ = 1;
-            for (char *i = pt; *i != '\0'; i++)
-            {
-                printf("%c", *i);
-            }
+        case S_NOPE:
+            if (*content == '\r')
+                state = S_CR;
+            break;
+        case S_CR:
+            state = (*content == '\n') ? S_CRLF : S_NOPE;
+            break;
+        case S_CRLF:
+            state = (*content == '\r') ? S_CRLFCR : S_NOPE;
+            break;
+        case S_CRLFCR:
+            state = (*content == '\n') ? S_CRLFCRLF : S_NOPE;
+            break;
+        case S_CRLFCRLF:
+            return content;
         }
     }
+    // fprintf(stderr, "%%%%%%%%%%RETURN NULL!!!!!\n");
+    return p;
 }

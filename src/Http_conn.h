@@ -15,8 +15,8 @@
 
 const char *ok_200_title = "OK";
 const char *error_500_title = "Serverr error";
-const char *error_500_path = "./500.html";
-const char *error_404_path = "./404.html";
+const char *error_500_path = "./500.final_html";
+const char *error_404_path = "./404.final_html";
 
 /*任务类*/
 class HttpConn
@@ -26,6 +26,8 @@ class HttpConn
 	static const int READ_BUFFERSIZE = 2048;
 	/*写头部缓冲区大小*/
 	static const int HEADER_BUFFERSIZE = 1024;
+	/*由php翻译过来的　html　文件　*/
+	static const int WRITE_BUFFERSIZE = 1024;
 
 	/*该连接的sockfd和对方的地址*/
 	int http_sockfd = 0;
@@ -83,8 +85,14 @@ class HttpConn
 		Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 		printf("出 send_header 函数\n ");
 
-		File file(http_data_pack.GetFileName(), O_RDONLY);
-		Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
+		printf(" 发送fina_html 文件\n");
+		printf(" final_html==%s\n", final_html);
+		send(Sockfd.GetBaseSocket(), final_html, strlen(final_html), 0);
+		// Sockfd.Sendlen(final_html, strlen(final_html), SOCK_NONBLOCK); /*非阻塞发送*/
+		printf(" 发送fina_html 文件    !!!!!!!!!!!!!!!!!!!!!!!!!完毕　\n");
+
+		// File file(http_data_pack.GetFileName(), O_RDONLY);
+		// Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
 
 		printf("  出sendfile 函数\n");
 
@@ -139,6 +147,7 @@ class HttpConn
 		http_header_index += ret;
 		//printf("2.addd_status_line : http_header_buf ==%s\n", http_header_buf);
 	}
+	/*接口设计得改变*/
 	void AddHeader()
 	{
 		int &index = http_header_index;
@@ -217,21 +226,57 @@ class HttpConn
 	{
 		if (http_data_pack.IsPhp())
 		{
-			std::cout << "---------------------------------php文件" << std::endl;
-			FastCgi_t *c;
-			c = (FastCgi_t *)malloc(sizeof(FastCgi_t));
-			FastCgi_init(c);
-			setRequestId(c, 1);
-			startConnect(c);
-			sendStartRequestRecord(c);
+			std::cout << "---------------------------------php 文件" << std::endl;
+			FastCgi_init(&fast_cgi);
+			setRequestId(&fast_cgi, 1);
+			startConnect(&fast_cgi);
+			sendStartRequestRecord(&fast_cgi);
 
 			printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
 
-			sendParams(c, "SCRIPT_FILENAME", http_data_pack.GetFileName());
-			sendParams(c, "REQUEST_METHOD", "GET");
-			sendEndRequestRecord(c);
-			readFromPhp(c);
-			FastCgi_finit(c);
+			sendParams(&fast_cgi, "SCRIPT_FILENAME", http_data_pack.GetFileName());
+			sendParams(&fast_cgi, "REQUEST_METHOD", "GET");
+			sendEndRequestRecord(&fast_cgi);
+			int total_len = 0;
+			char *full_result;
+			char *html;
+			full_result = readFromPhp(&fast_cgi);
+			std::cout << "full_result == " << full_result << std::endl;
+
+			html = findStartHtml(full_result);
+			std::cout << "html == " << html << std::endl;
+
+			auto htmlen = strlen(full_result) - (html - full_result);
+			std::cout << "totallen == " << strlen(full_result) << std::endl;
+			std::cout << "(final_html - full_result) == " << html - full_result << std::endl;
+			std::cout << "htmllen == " << htmlen << std::endl;
+			int i = 0;
+			for (i = 0; i < htmlen; i++)
+			{
+				final_html[i] = *(html + i);
+			}
+			final_html[i] = '\0';
+			int &index = http_header_index;
+			int ret = snprintf(http_header_buf + index,
+							   HEADER_BUFFERSIZE - 1 - index,
+							   "Connection: %s\r\n",
+							   (http_data_pack.IsKeep() == true)
+								   ? "keep-alive"
+								   : "close");
+			index += ret;
+			/*添加文件类型*/
+			ret = snprintf(http_header_buf + index,
+						   HEADER_BUFFERSIZE - 1 - index,
+						   "%s\r\n;%s", ConfigValue::Type[".html"].c_str(), "charset=utf-8\r\n");
+			index += ret;
+			/*添加空白行*/
+			ret = snprintf(http_header_buf + index,
+						   HEADER_BUFFERSIZE - 1 - index,
+						   "%s", "\r\n");
+			index += ret;
+			std::cout << http_header_buf << std::endl;
+
+			FastCgi_finit(&fast_cgi);
 		}
 		else
 		{
@@ -247,6 +292,8 @@ class HttpConn
 	/*http 解析类*/
 	HttpParse http_data_pack;
 	BaseSocket Sockfd;
+	FastCgi_t fast_cgi;
+	char final_html[WRITE_BUFFERSIZE] = {0};
 
 	/*读缓冲区*/
 	char http_read_buf[READ_BUFFERSIZE] = {0};

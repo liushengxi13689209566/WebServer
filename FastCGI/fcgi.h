@@ -46,6 +46,8 @@ int sendParams(FastCgi_t *c, char *name, char *value);
 int sendEndRequestRecord(FastCgi_t *c);
 
 //只读php-fpm 返回内容，读到的内容处理后期再添加
-int readFromPhp(FastCgi_t *c);
+char *readFromPhp(FastCgi_t *c);
+
+char *findStartHtml(char *content);
 
 #endif
