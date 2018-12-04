@@ -178,11 +178,10 @@ class HttpConn
 
 		switch (ret)
 		{
-		case FILE_RE:
+		case FILE_RE: /*文件请求*/
 		{
-			AddStatueLine(200, ok_200_title);
-			AddHeader();
-			/*从这里下来，就构造好了http的头部，但是因为没有修改事件类型，所以没有任何的发送的情况*/
+			Response();
+			/*没有修改事件类型，所以没有任何的发送的情况*/
 			break;
 		}
 		case SERVER_ERROR:
@@ -195,6 +194,35 @@ class HttpConn
 		}
 		//printf("出　process_write 函数\n");
 		return true;
+	}
+	void Response()
+	{
+		AddStatueLine(200, ok_200_title);
+		switch (http_data_pack.GetMethod())
+		{
+		case (GET):
+			ResponseGet(); /*处理静态文件和动态文件*/
+			break;
+		case (POST):
+			ResponsePost();
+			break;
+		default:
+			std::cout << "暂时不支持该方法" << std::endl;
+			break;
+		}
+	}
+	void ResponseGet()
+	{
+		// if (http_data_pack.IsDynamic()) /*fastcgi*/
+		// {
+		// }
+		// else
+		// {
+		AddHeader();
+		// }
+	}
+	void ResponsePost()
+	{
 	}
 
   private:

@@ -38,7 +38,7 @@ enum HTTP_CODE
     BAD_RE,           /*请求有语法错误*/
     FORBIDDEN_RE,     /*客户对该资源无权限*/
     NO_RESOURCE,      /*无此资源，发送404页面*/
-    FILE_RE,          /*静态文件请求*/
+    FILE_RE,          /*文件请求*/
     SERVER_ERROR,     /*服务器出错*/
     CLOSED_CONNECTION /*客户端关闭了连接*/
 };
@@ -140,6 +140,10 @@ class HttpParse
     {
         return http_real_file;
     }
+    inline METHOD GetMethod()
+    {
+        return http_method;
+    }
     inline bool IsKeep()
     {
         return http_keep_connect;
@@ -164,7 +168,6 @@ class HttpParse
 
         printf("http_real_file==%s\n", http_real_file);
 
-        //File file(http_real_file, O_RDONLY);
         File file(http_real_file, O_RDONLY);
 
         //printf("do_get_request ::http_real_file == %s\n", http_real_file);
@@ -237,6 +240,8 @@ class HttpParse
         char *method = line;
         if (strcasecmp(method, "GET") == 0)
             http_method = GET;
+        else if (strcasecmp(method, "POST") == 0)
+            http_method = POST;
         else
             return BAD_RE;
 
