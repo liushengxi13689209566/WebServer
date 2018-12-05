@@ -10,6 +10,9 @@
 /* http 请求方法，目前只支持 get */
 #include "../base/File.h"
 #include "../base/base.hpp"
+#include <map>
+
+std::unordered_map<std::string, std::string> NameValue;
 
 enum METHOD
 {
@@ -151,7 +154,7 @@ class HttpParse
     }
     inline bool IsDynamic()
     {
-        std::string tmp = http_real_file;
+        std::string tmp = http_url;
         if (tmp.find("?") != std::string::npos)
             return true;
         else
@@ -169,29 +172,9 @@ class HttpParse
         }
         return file_type == ".php";
     }
-
-  private:
-    HTTP_CODE DoRequest()
+    inline HTTP_CODE CheckFile()
     {
-        printf("http_url ==  %s\n", http_url);
-
-        int len = strlen(doc_root);
-        strncpy(http_real_file, doc_root, len);
-
-        if (!strcmp(http_url, "/"))
-        {
-            strncpy(http_real_file + len, "/html/index.html", FILENAME_LEN - 1 - len);
-        }
-        else
-        {
-            strncpy(http_real_file + len, http_url, FILENAME_LEN - 1 - len);
-        }
-
-        printf("http_real_file==%s\n", http_real_file);
-
         File file(http_real_file, O_RDONLY);
-
-        printf("fddddddddddddddddddddddddddddddddd == %d\n", file.GetFileFd());
         /*有三种情况，1（html）　2　(php)　3　(url中带有参数)*/
         // 在这里进行处理
         if (file.GetFileFd() < 0)
@@ -213,6 +196,39 @@ class HttpParse
         }
     }
 
+  private:
+    HTTP_CODE DoRequest()
+    {
+        printf("http_url ==  %s\n", http_url);
+        if (IsDynamic())
+        {
+            // 含有？号
+            return DoDynamicRequest();
+            /*解析ｕｒｌ*/
+        }
+        else /*get 没有参数,构建文件，检查文件*/
+        {
+            int len = strlen(doc_root);
+            strncpy(http_real_file, doc_root, len);
+
+            if (!strcmp(http_url, "/"))
+            {
+                strncpy(http_real_file + len, "/html/index.html", FILENAME_LEN - 1 - len);
+            }
+            else
+            {
+                strncpy(http_real_file + len, http_url, FILENAME_LEN - 1 - len);
+            }
+            printf("http_real_file==%s\n", http_real_file);
+
+            return CheckFile();
+        }
+    }
+    HTTP_CODE DoDynamicRequest()
+    {
+        /*解析参数和文件名*/
+        return CheckFile();
+    }
     /*process_read 所使用的函数*/
     LINE_STATUS ParseLine()
     {

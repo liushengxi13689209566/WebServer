@@ -53,6 +53,7 @@ class HttpConn
 		http_header_index = 0;
 		memset(http_read_buf, '\0', READ_BUFFERSIZE);
 		memset(http_header_buf, '\0', HEADER_BUFFERSIZE);
+		memset(final_html, '\0', WRITE_BUFFERSIZE);
 		http_have_sended = 0;
 	}
 	inline void HttpClose()
@@ -87,16 +88,21 @@ class HttpConn
 		Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 		printf("出 send_header 函数\n ");
 
-		printf(" 发送fina_html 文件\n");
-		printf(" final_html==%s\n", final_html);
-		send(Sockfd.GetBaseSocket(), final_html, strlen(final_html), 0);
-		// Sockfd.Sendlen(final_html, strlen(final_html), SOCK_NONBLOCK); /*非阻塞发送*/
-		printf(" 发送fina_html 文件    !!!!!!!!!!!!!!!!!!!!!!!!!完毕　\n");
+		// printf(" 发送fina_html 文件\n");
+		// printf(" final_html==%s\n", final_html);
+		if (strlen(final_html) != 0)
+		{
+			Sockfd.Sendlen(final_html, strlen(final_html), SOCK_NONBLOCK); /*非阻塞发送*/
+		}
+		else
+		{
+			File file(http_data_pack.GetFileName(), O_RDONLY);
+			Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
+		}
 
-		// File file(http_data_pack.GetFileName(), O_RDONLY);
-		// Sockfd.Sendfile(file.GetFileFd(), &http_have_sended, file.Size() - http_have_sended, http_have_sended);
+		// printf(" 发送fina_html 文件    !!!!!!!!!!!!!!!!!!!!!!!!!完毕　\n");
 
-		printf("  出sendfile 函数\n");
+		// printf("  出sendfile 函数\n");
 
 		if (http_data_pack.IsKeep())
 		{
@@ -150,7 +156,7 @@ class HttpConn
 		//printf("2.addd_status_line : http_header_buf ==%s\n", http_header_buf);
 	}
 	/*接口设计得改变*/
-	void AddHeader()
+	void AddHeader(std::string content_type = ".html")
 	{
 		int &index = http_header_index;
 		int ret = snprintf(http_header_buf + index,
@@ -161,14 +167,11 @@ class HttpConn
 							   : "close");
 		index += ret;
 		/*添加文件类型*/
-		std::string tmp = http_data_pack.GetFileName();
-
 		std::string key;
-		auto idx = tmp.rfind('.');
-
+		auto idx = content_type.rfind('.');
 		if (idx != std::string::npos)
 		{
-			key = tmp.substr(idx);
+			key = content_type.substr(idx);
 			ret = snprintf(http_header_buf + index,
 						   HEADER_BUFFERSIZE - 1 - index,
 						   "%s\r\n;%s", ConfigValue::Type[key].c_str(), "charset=utf-8\r\n");
@@ -233,50 +236,22 @@ class HttpConn
 			startConnect(&fast_cgi);
 			sendStartRequestRecord(&fast_cgi);
 			std::cout << "---------------------------------php 文件" << std::endl;
-
 			printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
-
 			sendParams(&fast_cgi, "SCRIPT_FILENAME", http_data_pack.GetFileName());
 			sendParams(&fast_cgi, "REQUEST_METHOD", "GET");
 			sendEndRequestRecord(&fast_cgi);
-			int total_len = 0;
 			char *full_result;
 			char *html;
 			full_result = readFromPhp(&fast_cgi);
-			std::cout << "full_result == " << full_result << std::endl;
-
 			html = findStartHtml(full_result);
-			std::cout << "html == " << html << std::endl;
-
 			auto htmlen = strlen(full_result) - (html - full_result);
-			std::cout << "totallen == " << strlen(full_result) << std::endl;
-			std::cout << "(final_html - full_result) == " << html - full_result << std::endl;
-			std::cout << "htmllen == " << htmlen << std::endl; // 40
 			int i = 0;
 			for (i = 0; i < htmlen; i++)
 			{
 				final_html[i] = *(html + i);
 			}
 			final_html[i] = '\0';
-			int &index = http_header_index;
-			int ret = snprintf(http_header_buf + index,
-							   HEADER_BUFFERSIZE - 1 - index,
-							   "Connection: %s\r\n",
-							   (http_data_pack.IsKeep() == true)
-								   ? "keep-alive"
-								   : "close");
-			index += ret;
-			/*添加文件类型*/
-			ret = snprintf(http_header_buf + index,
-						   HEADER_BUFFERSIZE - 1 - index,
-						   "%s\r\n;%s", ConfigValue::Type[".html"].c_str(), "charset=utf-8\r\n");
-			index += ret;
-			/*添加空白行*/
-			ret = snprintf(http_header_buf + index,
-						   HEADER_BUFFERSIZE - 1 - index,
-						   "%s", "\r\n");
-			index += ret;
-			std::cout << http_header_buf << std::endl;
+			AddHeader(".html");
 			FastCgi_finit(&fast_cgi);
 		}
 		else if (http_data_pack.IsDynamic())
@@ -285,7 +260,7 @@ class HttpConn
 		else
 		{
 			/*普通的静态html文件，直接的发送给客户端即可*/
-			AddHeader();
+			AddHeader(std::string(http_data_pack.GetFileName()));
 		}
 	}
 	void ResponsePost()
