@@ -27,7 +27,7 @@ class HttpConn
 	/*写头部缓冲区大小*/
 	static const int HEADER_BUFFERSIZE = 1024;
 	/*由php翻译过来的　html　文件　*/
-	static const int WRITE_BUFFERSIZE = 1024;
+	static const int WRITE_BUFFERSIZE = 20000;
 
 	/*该连接的sockfd和对方的地址*/
 	int http_sockfd = 0;
@@ -72,14 +72,10 @@ class HttpConn
 	/*循环读取客户数据，直到无数据可读或者对方关闭连接*/
 	inline bool HttpRead()
 	{
-		//printf("进入　read 函数 \n");
-		//printf("http_end_index ==%d\n", http_end_index);
 		if (http_end_index >= READ_BUFFERSIZE)
 			return false;
 		bool ret = Sockfd.RecvAll(http_read_buf, READ_BUFFERSIZE, http_end_index, SOCK_NONBLOCK);
 		return ret;
-		//printf("%s", http_read_buf);
-		//printf("http_end_index == %d\n", http_end_index);
 	}
 	/*触发写事件,响应请求*/
 	bool HttpWrite()
@@ -88,10 +84,9 @@ class HttpConn
 		Sockfd.Sendlen(http_header_buf, strlen(http_header_buf), SOCK_NONBLOCK); /*非阻塞发送*/
 		printf("出 send_header 函数\n ");
 
-		// printf(" 发送fina_html 文件\n");
-		// printf(" final_html==%s\n", final_html);
 		if (strlen(final_html) != 0)
 		{
+			/*这里需要考虑一下，翻译出来的html如果很大很大怎么办的问题*/
 			Sockfd.Sendlen(final_html, strlen(final_html), SOCK_NONBLOCK); /*非阻塞发送*/
 		}
 		else
@@ -229,17 +224,10 @@ class HttpConn
 	/*有三种情况，1（html）　2　(php)　3　(url中带有参数)*/
 	void ResponseGet()
 	{
-		if (http_data_pack.IsPhp())
+		/*单纯的请求了服务器的php文件*/
+		if (http_data_pack.IsPhp() && !http_data_pack.IsDynamic())
 		{
-			FastCgi_init(&fast_cgi);
-			setRequestId(&fast_cgi, 1);
-			startConnect(&fast_cgi);
-			sendStartRequestRecord(&fast_cgi);
-			std::cout << "---------------------------------php 文件" << std::endl;
-			printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
-			sendParams(&fast_cgi, "SCRIPT_FILENAME", http_data_pack.GetFileName());
-			sendParams(&fast_cgi, "REQUEST_METHOD", "GET");
-			sendEndRequestRecord(&fast_cgi);
+			FastCgiFun("GET");
 			char *full_result;
 			char *html;
 			full_result = readFromPhp(&fast_cgi);
@@ -256,6 +244,7 @@ class HttpConn
 		}
 		else if (http_data_pack.IsDynamic())
 		{
+			FastCgiFun("GET");
 		}
 		else
 		{
@@ -263,6 +252,20 @@ class HttpConn
 			AddHeader(std::string(http_data_pack.GetFileName()));
 		}
 	}
+	void FastCgiFun(char *method)
+	{
+		FastCgi_init(&fast_cgi);
+		setRequestId(&fast_cgi, 1);
+		startConnect(&fast_cgi);
+		sendStartRequestRecord(&fast_cgi);
+		std::cout << "----------------------------------------php 文件" << std::endl;
+
+		printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
+
+		sendParams(&fast_cgi, "SCRIPT_FILENAME", http_data_pack.GetFileName());
+		sendParams(&fast_cgi, "REQUEST_METHOD", method);
+		sendEndRequestRecord(&fast_cgi);
+		}
 	void ResponsePost()
 	{
 	}

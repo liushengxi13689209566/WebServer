@@ -12,7 +12,7 @@
 #include "../base/base.hpp"
 #include <map>
 
-std::unordered_map<std::string, std::string> NameValue;
+std::unordered_map<std::string, int> NameValue;
 
 enum METHOD
 {
@@ -200,17 +200,17 @@ class HttpParse
     HTTP_CODE DoRequest()
     {
         printf("http_url ==  %s\n", http_url);
+        int len = strlen(doc_root);
+        strncpy(http_real_file, doc_root, len);
+
         if (IsDynamic())
         {
+            printf("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{\n");
             // 含有？号
             return DoDynamicRequest();
-            /*解析ｕｒｌ*/
         }
         else /*get 没有参数,构建文件，检查文件*/
         {
-            int len = strlen(doc_root);
-            strncpy(http_real_file, doc_root, len);
-
             if (!strcmp(http_url, "/"))
             {
                 strncpy(http_real_file + len, "/html/index.html", FILENAME_LEN - 1 - len);
@@ -226,7 +226,21 @@ class HttpParse
     }
     HTTP_CODE DoDynamicRequest()
     {
-        /*解析参数和文件名*/
+        /*解析参数和文件名,http://127.0.0.1:10000/php/Operation.php?a=8&b=1&c=3&d=2*/
+        int i;
+        for (i = strlen(http_real_file); i < strlen(http_url); i++)
+        {
+            if (*(http_url + i) == '?')
+                break;
+            else
+                http_real_file[i] = *(http_url + i);
+        }
+        http_real_file[i] = '\0';
+        printf("http_real =%s\n", http_real_file);
+        sscanf(http_url + i, "a=%d&b=%d&c=%d&d=%d", &NameValue["a"], &NameValue["b"], &NameValue["c"], &NameValue["d"]);
+        for (auto test : NameValue)
+            std::cout << test.first << " , " << test.second << std::endl;
+        /*这里还不对，明天改*/
         return CheckFile();
     }
     /*process_read 所使用的函数*/
