@@ -41,7 +41,10 @@ class HttpConn
 	}
 	HttpConn(const HttpConn &conn) = delete;
 	HttpConn &operator=(const HttpConn &) = delete;
-	~HttpConn() {}
+	~HttpConn()
+	{
+		FastCgi_finit(&fast_cgi);
+	}
 
 	inline void HttpInit()
 	{
@@ -77,8 +80,7 @@ class HttpConn
 		//printf("%s", http_read_buf);
 		//printf("http_end_index == %d\n", http_end_index);
 	}
-	/*
-	触发写事件,响应请求*/
+	/*触发写事件,响应请求*/
 	bool HttpWrite()
 	{
 		printf(" 进入http_conn::write函数\n");
@@ -226,11 +228,11 @@ class HttpConn
 	{
 		if (http_data_pack.IsPhp())
 		{
-			std::cout << "---------------------------------php 文件" << std::endl;
 			FastCgi_init(&fast_cgi);
 			setRequestId(&fast_cgi, 1);
 			startConnect(&fast_cgi);
 			sendStartRequestRecord(&fast_cgi);
+			std::cout << "---------------------------------php 文件" << std::endl;
 
 			printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
 
@@ -249,7 +251,7 @@ class HttpConn
 			auto htmlen = strlen(full_result) - (html - full_result);
 			std::cout << "totallen == " << strlen(full_result) << std::endl;
 			std::cout << "(final_html - full_result) == " << html - full_result << std::endl;
-			std::cout << "htmllen == " << htmlen << std::endl;
+			std::cout << "htmllen == " << htmlen << std::endl; // 40
 			int i = 0;
 			for (i = 0; i < htmlen; i++)
 			{
@@ -275,8 +277,10 @@ class HttpConn
 						   "%s", "\r\n");
 			index += ret;
 			std::cout << http_header_buf << std::endl;
-
 			FastCgi_finit(&fast_cgi);
+		}
+		else if (http_data_pack.IsDynamic())
+		{
 		}
 		else
 		{

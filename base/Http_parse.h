@@ -149,6 +149,14 @@ class HttpParse
     {
         return http_keep_connect;
     }
+    inline bool IsDynamic()
+    {
+        std::string tmp = http_real_file;
+        if (tmp.find("?") != std::string::npos)
+            return true;
+        else
+            return false;
+    }
     inline bool IsPhp()
     {
         std::string tmp = http_real_file;
