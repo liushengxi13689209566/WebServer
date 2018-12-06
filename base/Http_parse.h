@@ -67,16 +67,16 @@ class HttpParse
     inline void Init()
     {
         retcode = RE_NOT_ENOUGH;
-        buffer = nullptr;
+        buffer = NULL;
         http_read_index = 0;
         http_checked_index = 0;
         http_start_line = 0;
         http_check_state = CHECK_REQUESTLINE;
         http_method = GET;
         memset(http_real_file, '\0', FILENAME_LEN);
-        http_url = nullptr;
-        http_version = nullptr;
-        http_host = nullptr;
+        http_url = NULL;
+        http_version = NULL;
+        http_host = NULL;
         http_content_length = 0;
         http_keep_connect = false;
     }
@@ -92,7 +92,7 @@ class HttpParse
 
         LINE_STATUS line_status = LINE_OK; /*记录当前行的状态*/
         retcode = RE_NOT_ENOUGH;           /*记录 http 请求的处理结果*/
-        char *line = nullptr;
+        char *line = NULL;
 
         /*主状态机，用于从　buffer 中取出所有完整的行,并对应进行分析　*/
         while (((http_check_state == CHECK_CONTENT) && (line_status == LINE_OK)) || ((line_status = ParseLine()) == LINE_OK))
@@ -227,15 +227,15 @@ class HttpParse
     HTTP_CODE DoDynamicRequest()
     {
         /*解析参数和文件名,http://127.0.0.1:10000/php/Operation.php?a=8&b=1&c=3&d=2*/
-        int i;
-        for (i = strlen(http_real_file); i < strlen(http_url); i++)
+        int i, k;
+        for (i = 0, k = strlen(http_real_file); i < strlen(http_url); i++, k++)
         {
             if (*(http_url + i) == '?')
                 break;
             else
-                http_real_file[i] = *(http_url + i);
+                http_real_file[k] = *(http_url + i);
         }
-        http_real_file[i] = '\0';
+        http_real_file[k] = '\0';
         printf("http_real =%s\n", http_real_file);
         sscanf(http_url + i, "a=%d&b=%d&c=%d&d=%d", &NameValue["a"], &NameValue["b"], &NameValue["c"], &NameValue["d"]);
         for (auto test : NameValue)
@@ -379,7 +379,7 @@ class HttpParse
     /*返回码*/
     HTTP_CODE retcode = RE_NOT_ENOUGH;
     /*指向http报文地址*/
-    char *buffer = nullptr;
+    char *buffer = NULL;
     /*http报文尾部下一个字节*/
     int http_read_index;
     /*正在分析的字符在读缓冲区中的位置*/
@@ -393,11 +393,11 @@ class HttpParse
     /*客户请求的目标文件的完整的路径，＝　root+url */
     char http_real_file[FILENAME_LEN] = {0};
     /*url*/
-    char *http_url = nullptr;
+    char *http_url = NULL;
     /*版本*/
-    char *http_version = nullptr;
+    char *http_version = NULL;
     /*主机名*/
-    char *http_host = nullptr;
+    char *http_host = NULL;
     /*http请求的消息体的长度*/
     int http_content_length = 0;
     /*是否需要保持连接*/

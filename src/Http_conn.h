@@ -1,3 +1,4 @@
+
 /*************************************************************************
 	> File Name: HttpConn.h
 	> Author: Liu Shengxi 
@@ -227,7 +228,7 @@ class HttpConn
 		/*单纯的请求了服务器的php文件*/
 		if (http_data_pack.IsPhp() && !http_data_pack.IsDynamic())
 		{
-			FastCgiFun("GET");
+			FastCgiFun(const_cast<char *>("GET"), false);
 			char *full_result;
 			char *html;
 			full_result = readFromPhp(&fast_cgi);
@@ -240,11 +241,10 @@ class HttpConn
 			}
 			final_html[i] = '\0';
 			AddHeader(".html");
-			FastCgi_finit(&fast_cgi);
 		}
 		else if (http_data_pack.IsDynamic())
 		{
-			FastCgiFun("GET");
+			FastCgiFun(const_cast<char *>("GET"), true);
 		}
 		else
 		{
@@ -252,7 +252,7 @@ class HttpConn
 			AddHeader(std::string(http_data_pack.GetFileName()));
 		}
 	}
-	void FastCgiFun(char *method)
+	void FastCgiFun(char *method, bool tag)
 	{
 		FastCgi_init(&fast_cgi);
 		setRequestId(&fast_cgi, 1);
@@ -262,10 +262,20 @@ class HttpConn
 
 		printf("http_data_pack,Getfilename ==  %s\n", http_data_pack.GetFileName());
 
-		sendParams(&fast_cgi, "SCRIPT_FILENAME", http_data_pack.GetFileName());
-		sendParams(&fast_cgi, "REQUEST_METHOD", method);
-		sendEndRequestRecord(&fast_cgi);
+		sendParams(&fast_cgi, const_cast<char *>("SCRIPT_FILENAME"), http_data_pack.GetFileName());
+		sendParams(&fast_cgi, const_cast<char *>("REQUEST_METHOD"), method);
+		if (tag)
+		{
+			char Value[200];
+			for (auto tmp : NameValue)
+			{
+				sprintf(Value, "%d", tmp.second);
+				sendParams(&fast_cgi, const_cast<char *>(tmp.first.data()), Value);
+			}
 		}
+		sendEndRequestRecord(&fast_cgi);
+		FastCgi_finit(&fast_cgi);
+	}
 	void ResponsePost()
 	{
 	}
