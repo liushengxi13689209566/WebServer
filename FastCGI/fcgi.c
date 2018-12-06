@@ -147,7 +147,7 @@ void startConnect(FastCgi_t *c)
     struct sockaddr_in server_address;
 
     /* 固定 */
-    char *ip = "127.0.0.1";
+    const char *ip = "127.0.0.1";
 
     /* 获取配置文件中的ip地址 */
     //ip = getIpFromConf();

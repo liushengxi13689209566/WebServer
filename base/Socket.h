@@ -48,7 +48,7 @@ class BaseSocket
             n = send(base_socket_, (void *)ptr, len - sum, flags);
             if (n < 0)
             {
-                if (errno == EINTR)
+                if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
                     n = 0;
                 else
                     throw CallFailed(" Socket.hpp 文件: sendlen function failed !!! at line  ", __LINE__);

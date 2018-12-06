@@ -222,13 +222,12 @@ class HttpConn
 			break;
 		}
 	}
-	/*有三种情况，1（html）　2　(php)　3　(url中带有参数)*/
+	/*有三种情况，　1(.php) */
 	void ResponseGet()
 	{
-		/*单纯的请求了服务器的php文件*/
-		if (http_data_pack.IsPhp() && !http_data_pack.IsDynamic())
+		if (http_data_pack.IsDynamic() || http_data_pack.IsPhp())
 		{
-			FastCgiFun(const_cast<char *>("GET"), false);
+			FastCgiFun(const_cast<char *>("GET"));
 			char *full_result;
 			char *html;
 			full_result = readFromPhp(&fast_cgi);
@@ -240,19 +239,20 @@ class HttpConn
 				final_html[i] = *(html + i);
 			}
 			final_html[i] = '\0';
+
+			std::cout << "final_html%%%%%%%%%%%%%%%%%%%%%%%%\% " << final_html << std::endl;
+
 			AddHeader(".html");
-		}
-		else if (http_data_pack.IsDynamic())
-		{
-			FastCgiFun(const_cast<char *>("GET"), true);
+			FastCgi_finit(&fast_cgi);
+			NameValue.clear();
 		}
 		else
 		{
-			/*普通的静态html文件，直接的发送给客户端即可*/
+			/*普通的静态html文件，直接发送给客户端即可*/
 			AddHeader(std::string(http_data_pack.GetFileName()));
 		}
 	}
-	void FastCgiFun(char *method, bool tag)
+	void FastCgiFun(char *method)
 	{
 		FastCgi_init(&fast_cgi);
 		setRequestId(&fast_cgi, 1);
@@ -264,17 +264,14 @@ class HttpConn
 
 		sendParams(&fast_cgi, const_cast<char *>("SCRIPT_FILENAME"), http_data_pack.GetFileName());
 		sendParams(&fast_cgi, const_cast<char *>("REQUEST_METHOD"), method);
-		if (tag)
+		/*如果是单纯的请求php文件，NameValue 就是空的*/
+		char Value[200];
+		for (auto tmp : NameValue)
 		{
-			char Value[200];
-			for (auto tmp : NameValue)
-			{
-				sprintf(Value, "%d", tmp.second);
-				sendParams(&fast_cgi, const_cast<char *>(tmp.first.data()), Value);
-			}
+			sprintf(Value, "%d", tmp.second);
+			sendParams(&fast_cgi, const_cast<char *>(tmp.first.data()), Value);
 		}
 		sendEndRequestRecord(&fast_cgi);
-		FastCgi_finit(&fast_cgi);
 	}
 	void ResponsePost()
 	{

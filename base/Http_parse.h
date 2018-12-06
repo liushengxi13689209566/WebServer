@@ -206,7 +206,7 @@ class HttpParse
         if (IsDynamic())
         {
             printf("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{\n");
-            // 含有？号
+            // 含有 ？ 号
             return DoDynamicRequest();
         }
         else /*get 没有参数,构建文件，检查文件*/
@@ -217,6 +217,7 @@ class HttpParse
             }
             else
             {
+                /*单纯的请求　php 文件就在这里处理了 */
                 strncpy(http_real_file + len, http_url, FILENAME_LEN - 1 - len);
             }
             printf("http_real_file==%s\n", http_real_file);
@@ -226,7 +227,7 @@ class HttpParse
     }
     HTTP_CODE DoDynamicRequest()
     {
-        /*解析参数和文件名,http://127.0.0.1:10000/php/Operation.php?a=8&b=1&c=3&d=2*/
+        /*解析参数和文件名 http://127.0.0.1:10000/php/Operation.php?a=8&b=1&c=3&d=2*/
         int i, k;
         for (i = 0, k = strlen(http_real_file); i < strlen(http_url); i++, k++)
         {
@@ -237,7 +238,8 @@ class HttpParse
         }
         http_real_file[k] = '\0';
         printf("http_real =%s\n", http_real_file);
-        sscanf(http_url + i, "a=%d&b=%d&c=%d&d=%d", &NameValue["a"], &NameValue["b"], &NameValue["c"], &NameValue["d"]);
+        sscanf(http_url + i + 1, "a=%d&b=%d&c=%d&d=%d", &NameValue["a"], &NameValue["b"], &NameValue["c"], &NameValue["d"]);
+
         for (auto test : NameValue)
             std::cout << test.first << " , " << test.second << std::endl;
         /*这里还不对，明天改*/
