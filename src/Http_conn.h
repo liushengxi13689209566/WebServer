@@ -179,8 +179,6 @@ class HttpConn
 					   HEADER_BUFFERSIZE - 1 - index,
 					   "%s", "\r\n");
 		index += ret;
-
-		printf("addd_header : http_header_buf ==%s\n", http_header_buf);
 	}
 	/*ProcessWrite 所使用的函数*/
 	bool ProcessWrite(HTTP_CODE ret)
@@ -265,13 +263,8 @@ class HttpConn
 
 		sendParams(&fast_cgi, const_cast<char *>("SCRIPT_FILENAME"), http_data_pack.GetFileName());
 		sendParams(&fast_cgi, const_cast<char *>("REQUEST_METHOD"), method);
-		/*如果是单纯的请求php文件，NameValue 就是空的*/
-		char Value[200];
-		for (auto tmp : NameValue)
-		{
-			sprintf(Value, "%d", tmp.second);
-			sendParams(&fast_cgi, const_cast<char *>(tmp.first.data()), Value);
-		}
+
+		//sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
 		sendEndRequestRecord(&fast_cgi);
 	}
 	void ResponsePost()

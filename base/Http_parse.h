@@ -79,6 +79,7 @@ class HttpParse
         http_host = NULL;
         http_content_length = 0;
         http_keep_connect = false;
+        query_string = NULL;
     }
     /*正式读取一个未知　http　报文的接口，所以必须在这里进行初始化*/
     HTTP_CODE HttpDataRead(char *http_read_buf, int &temp)
@@ -195,6 +196,10 @@ class HttpParse
             return FILE_RE;
         }
     }
+    inline char *GetQueryString()
+    {
+        return query_string;
+    }
 
   private:
     HTTP_CODE DoRequest()
@@ -238,6 +243,10 @@ class HttpParse
         }
         http_real_file[k] = '\0';
         printf("http_real =%s\n", http_real_file);
+
+        query_string = http_url + i + 1;
+        printf("query_string =%s\n", query_string);
+
         sscanf(http_url + i + 1, "a=%d&b=%d&c=%d&d=%d", &NameValue["a"], &NameValue["b"], &NameValue["c"], &NameValue["d"]);
 
         for (auto test : NameValue)
@@ -391,7 +400,7 @@ class HttpParse
     CHECK_STATE http_check_state = CHECK_REQUESTLINE;
     /*请求的方法*/
     METHOD http_method = GET;
-
+    char *query_string = NULL;
     /*客户请求的目标文件的完整的路径，＝　root+url */
     char http_real_file[FILENAME_LEN] = {0};
     /*url*/
