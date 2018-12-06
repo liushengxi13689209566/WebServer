@@ -47,7 +47,8 @@ class WebServer
 	int run()
 	{
 		/*忽略SIGPIPE信号(SIG_IGN表示忽略SIGPIPE那个注册的信号)*/
-		AddSig(SIGPIPE, SIG_IGN);
+		// AddSig(SIGPIPE, SIG_IGN);
+		signal(SIGPIPE, SIG_IGN);
 
 		ThreadPool pool(4);
 
