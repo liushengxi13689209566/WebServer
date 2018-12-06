@@ -225,7 +225,7 @@ class HttpConn
 	/*有三种情况，　1(.php) */
 	void ResponseGet()
 	{
-		if (http_data_pack.IsDynamic() || http_data_pack.IsPhp())
+		if (http_data_pack.IsPhp())
 		{
 			FastCgiFun(const_cast<char *>("GET"));
 			char *full_result;
@@ -234,6 +234,7 @@ class HttpConn
 			html = findStartHtml(full_result);
 			auto htmlen = strlen(full_result) - (html - full_result);
 			int i = 0;
+			memset(final_html, '\0', WRITE_BUFFERSIZE);
 			for (i = 0; i < htmlen; i++)
 			{
 				final_html[i] = *(html + i);
