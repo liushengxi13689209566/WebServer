@@ -10,7 +10,8 @@
     $c=$_REQUEST["c"];
     $d=$_REQUEST["d"];
     $result =($a-$b)+($c*$d);
-    echo '('$a.' - '.$b.') + ( '$c.' * '.$d. ')'   " = $result";
+
+    echo  $a.' - '.$b. ' + ' .$c. ' * ' .$d. " = $result"
 ?>
 </body>
 </html>

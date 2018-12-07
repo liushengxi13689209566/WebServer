@@ -249,9 +249,7 @@ char *readFromPhp(FastCgi_t *c)
             assert(ret == contentLen);
 
             /*test*/
-            // printf("content == %s \n", content);
-
-            //getHtmlFromContent(c, content);
+            printf("content == %s \n", content);
 
             /* 跳过填充部分 */
             if (responderHeader.paddingLength > 0)
@@ -322,4 +320,26 @@ char *findStartHtml(char *p)
     }
     // fprintf(stderr, "%%%%%%%%%%RETURN NULL!!!!!\n");
     return p;
+}
+void getHtmlFromContent(FastCgi_t *c, char *content)
+{
+    /* 保存html内容开始位置 */
+    char *pt;
+
+    /* 读取到的content是html内容 */
+    if (c->flag_ == 1)
+    {
+        printf("%s", content);
+    }
+    else
+    {
+        if ((pt = findStartHtml(content)) != NULL)
+        {
+            c->flag_ = 1;
+            for (char *i = pt; *i != '\0'; i++)
+            {
+                printf("%c", *i);
+            }
+        }
+    }
 }

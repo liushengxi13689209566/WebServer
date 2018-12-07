@@ -243,7 +243,6 @@ class HttpConn
 
 			AddHeader(".html");
 			FastCgi_finit(&fast_cgi);
-			NameValue.clear();
 		}
 		else
 		{
@@ -264,7 +263,9 @@ class HttpConn
 		sendParams(&fast_cgi, const_cast<char *>("SCRIPT_FILENAME"), http_data_pack.GetFileName());
 		sendParams(&fast_cgi, const_cast<char *>("REQUEST_METHOD"), method);
 
-		//sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
+		if (http_data_pack.GetQueryString())
+			sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
+
 		sendEndRequestRecord(&fast_cgi);
 	}
 	void ResponsePost()

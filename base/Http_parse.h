@@ -10,9 +10,6 @@
 /* http 请求方法，目前只支持 get */
 #include "../base/File.h"
 #include "../base/base.hpp"
-#include <map>
-
-std::unordered_map<std::string, int> NameValue;
 
 enum METHOD
 {
@@ -247,11 +244,6 @@ class HttpParse
         query_string = http_url + i + 1;
         printf("query_string =%s\n", query_string);
 
-        sscanf(http_url + i + 1, "a=%d&b=%d&c=%d&d=%d", &NameValue["a"], &NameValue["b"], &NameValue["c"], &NameValue["d"]);
-
-        for (auto test : NameValue)
-            std::cout << test.first << " , " << test.second << std::endl;
-        /*这里还不对，明天改*/
         return CheckFile();
     }
     /*process_read 所使用的函数*/

@@ -50,4 +50,7 @@ char *readFromPhp(FastCgi_t *c);
 
 char *findStartHtml(char *content);
 
+/*test*/
+void getHtmlFromContent(FastCgi_t *c, char *content);
+
 #endif
