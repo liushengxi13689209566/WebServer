@@ -1,3 +1,4 @@
 
 all:
-	gcc   -g *.c -std=c99 -o main 
+	gcc   -g post_main.c fcgi.c -std=c99 -o post 
+	gcc   -g get_main.c fcgi.c -std=c99 -o get 

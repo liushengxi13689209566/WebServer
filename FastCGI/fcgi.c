@@ -244,12 +244,12 @@ char *readFromPhp(FastCgi_t *c)
 
             /* 读取获取内容 */
             ret = read(c->sockfd_, content, contentLen);
-            printf("ret ==  %d\n", ret);
+            // printf("ret ==  %d\n", ret);
 
             assert(ret == contentLen);
 
             /*test*/
-            printf("content == %s \n", content);
+            // printf("content == %s \n", content);
 
             /* 跳过填充部分 */
             if (responderHeader.paddingLength > 0)
