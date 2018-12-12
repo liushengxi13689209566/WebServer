@@ -263,23 +263,32 @@ class HttpConn
 
 		sendParams(&fast_cgi, const_cast<char *>("SCRIPT_FILENAME"), http_data_pack.GetFileName());
 		sendParams(&fast_cgi, const_cast<char *>("REQUEST_METHOD"), method);
+
 		/*处理get 带参数的情况*/
 		if (http_data_pack.IsDynamic())
+		{
+			printf("get参数,QueryString==%s\n", http_data_pack.GetQueryString());
 			sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
+		}
 
+		if (http_data_pack.GetContentLength() != 0)
+		{
+			printf("content-length==%d\n", http_data_pack.GetContentLength());
+			sendParams(&fast_cgi, const_cast<char *>("CONTENT_LENGTH"), (char *)std::to_string(http_data_pack.GetContentLength()).c_str());
+			sendParams(&fast_cgi, "CONTENT_TYPE", "application/x-www-form-urlencoded");
+		}
 		sendEndRequestRecord(&fast_cgi);
 
 		if (http_data_pack.GetContentLength() != 0)
 		{
-			sendParams(&fast_cgi, const_cast<char *>("CONTENT_LENGTH"), (char *)std::to_string(http_data_pack.GetContentLength()).c_str());
-			printf("contenlength==%d\n", http_data_pack.GetContentLength());
-			printf("query_string==%s\n", http_data_pack.GetQueryString());
+			printf("post 参数,QueryString==%s\n", http_data_pack.GetQueryString());
+
 			auto t = makeHeader(5, 1, http_data_pack.GetContentLength(), 0);
 			send(fast_cgi.sockfd_, &t, sizeof(t), 0);
+
 			send(fast_cgi.sockfd_, http_data_pack.GetQueryString(), http_data_pack.GetContentLength(), 0);
 			t = makeHeader(5, 1, 0, 0);
 			send(fast_cgi.sockfd_, &t, sizeof(t), 0);
-			//sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
 		}
 	}
 	void ResponsePost()
