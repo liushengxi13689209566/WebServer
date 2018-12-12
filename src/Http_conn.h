@@ -13,6 +13,7 @@
 #include "../base/Socket.h"
 #include "../base/Server_init.h"
 #include "../FastCGI/fcgi.h"
+#include <string>
 
 const char *ok_200_title = "OK";
 const char *error_500_title = "Serverr error";
@@ -262,14 +263,45 @@ class HttpConn
 
 		sendParams(&fast_cgi, const_cast<char *>("SCRIPT_FILENAME"), http_data_pack.GetFileName());
 		sendParams(&fast_cgi, const_cast<char *>("REQUEST_METHOD"), method);
-
-		if (http_data_pack.GetQueryString())
+		/*处理get 带参数的情况*/
+		if (http_data_pack.IsDynamic())
 			sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
 
 		sendEndRequestRecord(&fast_cgi);
+
+		if (http_data_pack.GetContentLength() != 0)
+		{
+			sendParams(&fast_cgi, const_cast<char *>("CONTENT_LENGTH"), (char *)std::to_string(http_data_pack.GetContentLength()).c_str());
+			printf("contenlength==%d\n", http_data_pack.GetContentLength());
+			printf("query_string==%s\n", http_data_pack.GetQueryString());
+			auto t = makeHeader(5, 1, http_data_pack.GetContentLength(), 0);
+			send(fast_cgi.sockfd_, &t, sizeof(t), 0);
+			send(fast_cgi.sockfd_, http_data_pack.GetQueryString(), http_data_pack.GetContentLength(), 0);
+			t = makeHeader(5, 1, 0, 0);
+			send(fast_cgi.sockfd_, &t, sizeof(t), 0);
+			//sendParams(&fast_cgi, const_cast<char *>("QUERY_STRING"), http_data_pack.GetQueryString());
+		}
 	}
 	void ResponsePost()
 	{
+		FastCgiFun(const_cast<char *>("POST"));
+		char *full_result;
+		char *html;
+		full_result = readFromPhp(&fast_cgi);
+		html = findStartHtml(full_result);
+		auto htmlen = strlen(full_result) - (html - full_result);
+		int i = 0;
+		memset(final_html, '\0', WRITE_BUFFERSIZE);
+		for (i = 0; i < htmlen; i++)
+		{
+			final_html[i] = *(html + i);
+		}
+		final_html[i] = '\0';
+
+		std::cout << "final_html%%%%%%%%%%%%%%%%%%%%%%%%\% " << final_html << std::endl;
+
+		AddHeader(".html");
+		FastCgi_finit(&fast_cgi);
 	}
 
   private:

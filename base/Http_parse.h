@@ -146,6 +146,10 @@ class HttpParse
     {
         return http_method;
     }
+    inline int GetContentLength()
+    {
+        return http_content_length;
+    }
     inline bool IsKeep()
     {
         return http_keep_connect;
@@ -372,6 +376,7 @@ class HttpParse
         if (http_read_index >= (http_content_length + http_checked_index))
         {
             line[http_content_length] = '\0';
+            query_string = line; /*将查询字符串指向消息内容*/
             return ENOUGH_RE;
         }
         return RE_NOT_ENOUGH;
