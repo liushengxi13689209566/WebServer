@@ -1,33 +1,28 @@
 # A C++ High Performance Web Server
 
-[![Build Status](https://travis-ci.org/linyacool/WebServer.svg?branch=master)](https://travis-ci.org/linyacool/WebServer)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+本项目为使用C++11编写的Web服务器，支持静态请求和 PHP 文件，实现了 GET、POST 等基本请求的解析与响应。
 
-  
+----------
+
 ## Introduction  
 
-本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，支持管线化请求，并实现了异步日志，记录服务器运行状态。  
-
-测试页：http://www.linya.pub/
-
-
-| Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ | Part Ⅴ | Part Ⅵ |
-| :--------: | :---------: | :---------: | :---------: | :---------: | :---------: |
-| [并发模型](https://github.com/linyacool/WebServer/blob/master/并发模型.md)|[连接的维护](https://github.com/linyacool/WebServer/blob/master/连接的维护.md)|[版本历史](https://github.com/linyacool/WebServer/blob/master/%E7%89%88%E6%9C%AC%E5%8E%86%E5%8F%B2.md) | [测试及改进](https://github.com/linyacool/WebServer/blob/master/测试及改进.md) | [项目目的](https://github.com/linyacool/WebServer/blob/master/%E9%A1%B9%E7%9B%AE%E7%9B%AE%E7%9A%84.md) | [面试问题](https://github.com/linyacool/WebServer/blob/master/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.md)
+C++ 语言开发，采用 Reactor+线程池 的结构，维护状态机解析 HTTP 请求，使用 Rapidjson 解析 JSO配置文件，通过 FastCGI 协议与 PHP 后台引擎进行通讯。
 
 ## Envoirment  
-* OS: Ubuntu 14.04
-* Complier: g++ 4.8
+
+* OS: Linux 
+* Complier: g++ / clang++ 
 
 ## Build
 
-	./build.sh
+	cd /WebServer/src && make 
 
 ## Usage
 
-	./WebServer [-t thread_numbers] [-p port] [-l log_file_path(should begin with '/')]
+	./WebServer ip port 
 
 ## Technical points
+
 * 使用Epoll边沿触发的IO多路复用技术，非阻塞IO，使用Reactor模式
 * 使用多线程充分利用多核CPU，并使用线程池避免线程频繁创建销毁的开销
 * 使用基于小根堆的定时器关闭超时请求
@@ -43,9 +38,6 @@
 并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/linyacool/WebServer/blob/master/并发模型.md)
 ![并发模型](https://github.com/linyacool/WebServer/blob/master/datum/model.png)
 
-## 代码统计
-
-![cloc](https://github.com/linyacool/WebServer/blob/master/datum/cloc.png)
 
 
 ## Others
