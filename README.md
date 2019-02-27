@@ -1,12 +1,32 @@
-# A C++ High Performance Web Server
+<div align="center">
 
-本项目为使用C++11编写的Web服务器，支持静态请求和 PHP 文件，实现了 GET、POST 等基本请求的解析与响应。
+                    WebServer
 
-----------
+
+A C++ Web Server 
+
+支持静态请求和 PHP 文件的简易 Web 服务器，实现了 GET、POST 等基本请求的解析与响应
+
+![](https://img.shields.io/badge/release-v1.0-blue.svg)
+![](https://img.shields.io/badge/build-passing-green.svg)
+![](https://img.shields.io/badge/dependencies-up%20to%20date-green.svg)
+![](https://img.shields.io/badge/license-MIT-blue.svg)
+
+</div>
+--------
+##### 快速使用指南:
+
+```cpp
+
+
+```
+##### 运行结果:
+
+--------
 
 ## Introduction  
 
-C++ 语言开发，采用 Reactor+线程池 的结构，维护状态机解析 HTTP 请求，使用 Rapidjson 解析 JSO配置文件，通过 FastCGI 协议与 PHP 后台引擎进行通讯。
+C++ 语言开发，采用 Reactor+线程池 的结构，维护状态机解析 HTTP 请求，使用 RapidJSON 解析 JSON 配置文件，通过 FastCGI 协议与 PHP 后台引擎进行通讯。
 
 ## Envoirment  
 
