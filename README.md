@@ -24,22 +24,37 @@ WebServer
 
 --------
 
-## Introduction  
+## 简介
 
 C++ 语言开发，采用 Reactor+线程池 的结构，维护状态机解析 HTTP 请求，使用 RapidJSON 解析 JSON 配置文件，通过 FastCGI 协议与 PHP 后台引擎进行通讯。
 
-## Envoirment  
+## 特性（会包含编程模型）
+高性能。采用多线程异步I/O多路复用模型，请求处理速度较快。
+低占用，低泄露。内存采用智能指针管理，理论上无内存泄露。同时内存已进行合理的预分配，减少了不必要的内存占用。
+配置简易。使用JSON格式单配置文件，附带初始配置文档，简单需求下不需要更改过多的配置项。
+运行简单。直接在后台执行即可提供持续的Web服务。
+稳定性高。
+特性
+HTTP请求剖析器(src/http/http_parser.*)；
+支持处理普通GET请求；
+支持处理FastCGI请求(如php-fpm)；
+HTTP 1.1部分特性，包括长连接及最长无活动连接时间限制；
+
+
+## 运行环境
 
 * OS: Linux 
 * Complier: g++ / clang++ 
 
-## Build
-
+## 安装与使用
+    git clo
 	cd /WebServer/src && make 
+    ./WebServer ip port 
 
-## Usage
+## 具体使用方法　
 
-	./WebServer ip port 
+
+	
 
 ## Technical points
 
