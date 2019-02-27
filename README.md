@@ -1,9 +1,7 @@
 <div align="center">
 
-                    WebServer
+WebServer
 
-
-A C++ Web Server 
 
 支持静态请求和 PHP 文件的简易 Web 服务器，实现了 GET、POST 等基本请求的解析与响应
 
@@ -13,7 +11,9 @@ A C++ Web Server
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 
 </div>
+
 --------
+
 ##### 快速使用指南:
 
 ```cpp
