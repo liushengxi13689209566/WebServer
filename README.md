@@ -89,17 +89,24 @@ int main(int argc, char *argv[])
 
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/get.png)
 
+----- 
+
 ##### (4)带参数的GET请求
 
+----- 
 
 ##### (3)POST请求
 
+----- 
 
 ##### (4）浏览器页面播放　音频和视频
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/music.png)
-![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/viedo.png)
 
+----- 
 
+![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/video.png)
+
+------
 　
 ## Model
 
