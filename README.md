@@ -18,8 +18,8 @@ WebServer
 
 ```cpp
 
-    const char *ip = argv[1];
 	const int port = atoi(argv[2]);
+    const char *ip = argv[1];
 
 	ConfigServer::ServerInit Init;
 	WebServer server(ip, port);
@@ -30,7 +30,7 @@ WebServer
 
 ## 概述
 
-&emsp;&emsp;使用　C++ 语言开发，采用 Reactor+线程池 的结构，维护状态机解析 HTTP 请求，使用 RapidJSON 解析 JSON 配置文件，通过 FastCGI 协议与 PHP 后台引擎进行通讯。
+使用　C++ 语言开发，采用 Reactor+线程池 的结构，维护状态机解析 HTTP 请求，使用 RapidJSON 解析 JSON 配置文件，通过 FastCGI 协议与 PHP 后台引擎进行通讯。
 
 ## 特性
 
@@ -96,7 +96,8 @@ int main(int argc, char *argv[])
 
 
 ##### (4）浏览器页面播放　音频和视频
-
+![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/music.png)
+![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/viedo.png)
 
 
 　
