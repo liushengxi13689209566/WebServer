@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
 ------
 　
-## WebBench 测试
+## WebBench 压测
 
 统一使用命令
 
@@ -127,9 +127,6 @@ int main(int argc, char *argv[])
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/webbench.png)
 
 
-| 表格      | 第一列     | 第二列     |
-| ---------- | :-----------:  | :-----------: |
-| 第一行     | 第一列     | 第二列     |
 
 
 
