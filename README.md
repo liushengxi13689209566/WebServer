@@ -39,6 +39,7 @@ WebServer
 - 维护　有限状态机　去解析　Http 请求，提高解析速率
 - 使用配置文件，配置服务器参数，并使用　RapidJSON库 解析 JSON 配置文件
 - 通过 FastCGI 协议与 PHP 后台引擎进行通讯,以支持 PHP 请求　
+- 支持在浏览器页面播放　音频和视频
 
 ## 运行环境
 
@@ -86,12 +87,16 @@ int main(int argc, char *argv[])
 ## 运行结果
 ##### (1)普通GET请求
 
+![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/get.png)
 
 ##### (4)带参数的GET请求
 
+
 ##### (3)POST请求
 
-##### (4）其他
+
+##### (4）浏览器页面播放　音频和视频
+
 
 
 　
