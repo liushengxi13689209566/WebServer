@@ -92,11 +92,11 @@ int main(int argc, char *argv[])
 ----- 
 
 ##### (4)带参数的GET请求
-
+![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/get_01.png)
 ----- 
 
 ##### (3)POST请求
-
+![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/post.png)
 ----- 
 
 ##### (4）浏览器页面播放　音频和视频
