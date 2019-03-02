@@ -41,6 +41,11 @@ WebServer
 - 通过 FastCGI 协议与 PHP 后台引擎进行通讯,以支持 PHP 请求　
 - 支持在浏览器页面播放　音频和视频
 
+## 服务器模型（图片来自网络，但是与我的模型完全相同）
+
+![并发模型](https://github.com/linyacool/WebServer/blob/master/datum/model.png)
+
+
 ## 运行环境
 
 * OS: Linux 
@@ -108,9 +113,7 @@ int main(int argc, char *argv[])
 
 ------
 　
-## 服务器模型（图片来自网络）
 
-![并发模型](https://github.com/linyacool/WebServer/blob/master/datum/model.png)
 
 
 
