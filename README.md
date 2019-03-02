@@ -108,9 +108,8 @@ int main(int argc, char *argv[])
 
 ------
 　
-## Model
+## 服务器模型（图片来自网络）
 
-并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/linyacool/WebServer/blob/master/并发模型.md)
 ![并发模型](https://github.com/linyacool/WebServer/blob/master/datum/model.png)
 
 
