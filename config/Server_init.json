@@ -8,7 +8,7 @@
         "filename-len": 200
     },
     "default-config": {
-        "www-root": "/home/pangda/wwwroot"
+        "www-root": "/home/Shengxi-Liu/wwwroot"
     },
     "fastcgi": {
         "match": ".+\\.(php)$",

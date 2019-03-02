@@ -47,12 +47,12 @@
 
 #define BUFFER_SIZE 4096
 #define CHAR_MAX_SIZE 512
-#define PATH_404 "/home/Shengxi-Liu/TinyWebService/myWebServer/HTML/404.html"
-#define PATH_501 "/home/Shengxi-Liu/TinyWebService/myWebServer/HTML/501.html"
-#define PATH_666 "/home/Shengxi-Liu/TinyWebService/myWebServer/HTML/666.html"
-#define ROOT_PATH "/home/Shengxi-Liu/TinyWebService/myWebServer"
-#define PATH_404_PNG "/home/Shengxi-Liu/TinyWebService/myWebServer/Picture/404.png"
-#define PATH_ICO "/home/Shengxi-Liu/TinyWebService/myWebServer/Picture/666.ico"
+#define PATH_404 "./HTML/404.html"
+#define PATH_501 "./HTML/501.html"
+#define PATH_666 "./HTML/666.html"
+#define ROOT_PATH "./"
+#define PATH_404_PNG "./Picture/404.png"
+#define PATH_ICO "./Picture/666.ico"
 #define MAX_EVENT_NUMBER 1024
 class WebServer
 {
