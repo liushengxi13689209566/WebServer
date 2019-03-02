@@ -16,7 +16,7 @@ WebServer
 
 ##### 快速使用指南:
 
-```
+```cpp
 const int port = atoi(argv[2]);
 const char *ip = argv[1];
 
@@ -89,21 +89,21 @@ int main(int argc, char *argv[])
 }
 ```
 ## 运行结果
-##### (1)普通GET请求
+##### (1) 普通GET请求
 
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/get.png)
 
 ----- 
 
-##### (4)带参数的GET请求
+##### (2) 带参数的GET请求
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/get_01.png)
 ----- 
 
-##### (3)POST请求
+##### (3) POST请求
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/post.png)
 ----- 
 
-##### (4）浏览器页面播放　音频和视频
+##### (4) 浏览器页面播放　音频和视频
 ![](https://github.com/liushengxi13689209566/WebServer/blob/master/image/music.png)
 
 ----- 
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
 ------
 　
-
+## WebBench 测试
 
 
 
