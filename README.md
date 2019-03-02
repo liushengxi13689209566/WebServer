@@ -16,14 +16,13 @@ WebServer
 
 ##### 快速使用指南:
 
-```cpp
+```
+const int port = atoi(argv[2]);
+const char *ip = argv[1];
 
-	const int port = atoi(argv[2]);
-    const char *ip = argv[1];
-
-	ConfigServer::ServerInit Init;
-	WebServer server(ip, port);
-	server.run();
+ConfigServer::ServerInit Init;
+WebServer server(ip, port);
+server.run();
 
 ```
 --------
