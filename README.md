@@ -5,10 +5,10 @@ WebServer
 
 支持静态请求和 PHP 文件的简易 Web 服务器，实现了 GET、POST 等基本请求的解析与响应
 
-![](https://img.shields.io/badge/release-v1.0-blue.svg)
-![](https://img.shields.io/badge/build-passing-green.svg)
+![](https://img.shields.io/badge/release-v1.0-green.svg)
+![](https://img.shields.io/badge/Base%20On-FastCGI-green.svg)
 ![](https://img.shields.io/badge/dependencies-up%20to%20date-green.svg)
-![](https://img.shields.io/badge/license-MIT-blue.svg)
+![](https://img.shields.io/badge/Base%20On-rapidJSON-green.svg)
 
 </div>
 
@@ -131,8 +131,7 @@ int main(int argc, char *argv[])
 | ---------- | :-----------:  | :-----------: |
 | 第一行     | 第一列     | 第二列     |
 
-## Others
 
 
-## 
+
 
